@@ -20,6 +20,10 @@
 ### 1. การเตรียมความพร้อม
 - ดาวน์โหลดและติดตั้ง [Android Studio](https://developer.android.com/studio) บนคอมพิวเตอร์ของคุณ
 - ตรวจสอบให้แน่ใจว่าได้ติดตั้ง Android SDK (แนะนำ SDK 30 ขึ้นไป)
+- โปรเจกต์นี้ใช้ Android Gradle Plugin 8.13 และ Gradle 8.13 ซึ่งต้องใช้ **Gradle JDK 21**
+- ใน Android Studio ไปที่ **File > Settings > Build, Execution, Deployment > Build Tools > Gradle**
+  แล้วตั้ง **Gradle JDK** เป็น `jbr-21` หรือ **Embedded JDK** ที่เป็น Java 21
+  (ห้ามเลือก JDK 25 เพราะ Gradle 8.13 ยังไม่รองรับ)
 
 ### 2. นำเข้าโปรเจกต์ (Import Project)
 1. เปิดโปรเจกต์ Android Studio
@@ -48,3 +52,12 @@
 2. รอจนเสร็จสิ้น (จะมีหน้าต่างป๊อปอัปเด้งแจ้งเตือนที่มุมขวาล่าง)
 3. กดปุ่ม **Locate** เพื่อเปิดโฟลเดอร์เก็บไฟล์ `app-debug.apk`
 4. ทำการก๊อปปี้ไฟล์ `.apk` ดังกล่าวลงแฟลชไดรฟ์ (USB) แล้วนำไปติดตั้งบน Android TV ของคุณ
+
+### 6. ทดสอบบน Android TV/Emulator
+1. เชื่อมต่อ Android TV หรือเปิด Android TV Emulator และเปิด **USB debugging**
+2. ใน Android Studio เลือกอุปกรณ์จากแถบ Device แล้วกด **Run 'app'**
+3. หากต้องการติดตั้ง APK ด้วยคำสั่ง ให้ใช้:
+   ```powershell
+   adb install -r app\build\outputs\apk\debug\app-debug.apk
+   ```
+4. หาก Android Studio แสดง `Incompatible Gradle JVM version` ให้กลับไปตั้ง **Gradle JDK เป็น Java 21** ตามข้อ 1 แล้วกด **Sync Project with Gradle Files** ใหม่
