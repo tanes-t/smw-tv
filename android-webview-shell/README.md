@@ -22,8 +22,10 @@
 - ตรวจสอบให้แน่ใจว่าได้ติดตั้ง Android SDK (แนะนำ SDK 30 ขึ้นไป)
 - โปรเจกต์นี้ใช้ Android Gradle Plugin 8.13 และ Gradle 8.13 ซึ่งต้องใช้ **Gradle JDK 21**
 - ใน Android Studio ไปที่ **File > Settings > Build, Execution, Deployment > Build Tools > Gradle**
-  แล้วตั้ง **Gradle JDK** เป็น `jbr-21` หรือ **Embedded JDK** ที่เป็น Java 21
+  แล้วตั้ง **Gradle JDK** เป็น JDK 21 ที่ติดตั้งสมบูรณ์
   (ห้ามเลือก JDK 25 เพราะ Gradle 8.13 ยังไม่รองรับ)
+- ตรวจสอบ JDK ที่เลือกด้วย `java -version` ต้องแสดง `21.x` และโฟลเดอร์ JDK ต้องมีไฟล์ `lib\jvm.cfg`
+- หาก `Embedded JDK/jbr-21` ไม่มี `lib\jvm.cfg` ให้ติดตั้ง JDK 21 ใหม่ เช่น Eclipse Temurin 21 แล้วเลือกโฟลเดอร์ JDK นั้นแทน
 
 ### 2. นำเข้าโปรเจกต์ (Import Project)
 1. เปิดโปรเจกต์ Android Studio
