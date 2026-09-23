@@ -2,9 +2,12 @@ package com.siammetalwork.smwtv;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.WindowManager;
+import android.net.Uri;
+import android.webkit.CookieManager;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -36,8 +39,11 @@ public class MainActivity extends Activity {
         webSettings.setJavaScriptEnabled(true);
         webSettings.setDomStorageEnabled(true); // Crucial for storing API URL in localStorage
         webSettings.setDatabaseEnabled(true);
+        webSettings.setMediaPlaybackRequiresUserGesture(false);
         webSettings.setLoadsImagesAutomatically(true);
         webSettings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
+        CookieManager.getInstance().setAcceptCookie(true);
+        CookieManager.getInstance().setAcceptThirdPartyCookies(myWebView, true);
         
         // Enable file access for loading local asset index.html
         webSettings.setAllowFileAccess(true);
@@ -56,13 +62,34 @@ public class MainActivity extends Activity {
         myWebView.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                if (isYouTubeUrl(url)) {
+                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+                    return true;
+                }
                 view.loadUrl(url);
                 return true;
+            }
+
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, android.webkit.WebResourceRequest request) {
+                if (request.isForMainFrame() && isYouTubeUrl(request.getUrl().toString())) {
+                    startActivity(new Intent(Intent.ACTION_VIEW, request.getUrl()));
+                    return true;
+                }
+                return false;
             }
         });
 
         // Load the React TV App URL
         myWebView.loadUrl(DEFAULT_URL);
+    }
+
+    private boolean isYouTubeUrl(String url) {
+        Uri uri = Uri.parse(url);
+        String host = uri.getHost();
+        return host != null && (host.equals("youtube.com")
+                || host.endsWith(".youtube.com")
+                || host.equals("youtu.be"));
     }
 
     @Override

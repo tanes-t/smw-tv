@@ -316,6 +316,27 @@ button {
   width: 100%;
 }
 
+.player-external-link {
+  align-items: center;
+  background: rgba(220, 38, 38, 0.92);
+  border-radius: 0.35rem;
+  bottom: 1rem;
+  color: #fff;
+  display: inline-flex;
+  font-size: 0.78rem;
+  font-weight: 800;
+  padding: 0.55rem 0.8rem;
+  position: absolute;
+  right: 1rem;
+  text-decoration: none;
+  z-index: 2;
+}
+
+.player-external-link:focus,
+.player-external-link:hover {
+  background: #ef4444;
+}
+
 .stream-placeholder {
   align-items: center;
   background:

@@ -187,7 +187,7 @@ export default function SettingsModal({
                 className="settings-input"
                 value={streamUrl}
                 onChange={(e) => setStreamUrl(e.target.value)}
-                placeholder="https://... URL สำหรับเปิดใน iframe หรือเล่นวิดีโอ"
+                placeholder="YouTube URL, https://... หรือ video stream URL"
               />
             </div>
           )}

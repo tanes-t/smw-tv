@@ -14,6 +14,7 @@ import {
   getStoredChannelViewType,
   isSettingsChannel
 } from './config/tvChannels';
+import { getYouTubeEmbedUrl, isYouTubeUrl } from './utils/youtube';
 
 const CONTENT_ITEMS = 6;
 
@@ -62,6 +63,8 @@ export default function App() {
   const activeChannel = TV_CHANNELS[activeChannelIdx];
   const apiUrl = channelApiUrls[activeChannel.no] || activeChannel.apiUrl || '';
   const streamUrl = channelStreamUrls[activeChannel.no] || activeChannel.streamUrl || apiUrl;
+  const isYouTubeStream = isYouTubeUrl(streamUrl);
+  const playerUrl = isYouTubeStream ? getYouTubeEmbedUrl(streamUrl) : streamUrl;
   const currentViewType = channelViewTypes[activeChannel.no] || activeChannel.view || 'dashboard';
   const playableChannels = useMemo(() => TV_CHANNELS.filter((channel) => !isSettingsChannel(channel)), []);
 
@@ -328,12 +331,25 @@ export default function App() {
 
         <section className={`player-shell ${zone === 'content' && contentIndex === 0 ? 'focused' : ''}`}>
           {currentViewType === 'iframe' && streamUrl ? (
-            <iframe
-              src={streamUrl}
-              title={activeChannel.name}
-              allow="autoplay; fullscreen"
-              className="stream-frame"
-            />
+            <>
+              <iframe
+                src={playerUrl}
+                title={activeChannel.name}
+                allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
+                referrerPolicy="strict-origin-when-cross-origin"
+                className="stream-frame"
+              />
+              {isYouTubeStream && (
+                <a
+                  className="player-external-link"
+                  href={streamUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  เปิดใน YouTube
+                </a>
+              )}
+            </>
           ) : currentViewType === 'video' && streamUrl ? (
             <video className="stream-frame" src={streamUrl} controls autoPlay muted playsInline />
           ) : (
