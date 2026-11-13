@@ -11,6 +11,7 @@
     "sync:android": "powershell -Command \"Copy-Item -Path 'dist/*' -Destination 'android-webview-shell/app/src/main/assets/' -Recurse -Force\""
   },
   "dependencies": {
+    "redis": "^5.8.2",
     "react": "^19.2.6",
     "react-dom": "^19.2.6"
   },

@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bg08" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#04120a"/>
+      <stop offset="50%" stop-color="#082012"/>
+      <stop offset="100%" stop-color="#030c06"/>
+    </linearGradient>
+    <pattern id="grid08" width="30" height="30" patternUnits="userSpaceOnUse">
+      <path d="M 30 0 L 0 0 0 30" fill="none" stroke="rgba(46,213,115,0.06)" stroke-width="1"/>
+    </pattern>
+  </defs>
+
+  <rect width="800" height="450" fill="url(#bg08)"/>
+  <rect width="800" height="450" fill="url(#grid08)"/>
+  <circle cx="260" cy="220" r="150" fill="#2ed573" opacity="0.08" filter="blur(40px)"/>
+
+  <!-- Left: Safety Shield & Green Cross Graphic -->
+  <g transform="translate(60, 110)">
+    <!-- Safety Shield Silhouette -->
+    <path d="M 160 30 Q 250 50 250 140 Q 250 210 160 250 Q 70 210 70 140 Q 70 50 160 30 Z" fill="#0c2918" stroke="#2ed573" stroke-width="2.5"/>
+    <path d="M 160 45 Q 235 62 235 140 Q 235 198 160 234 Q 85 198 85 140 Q 85 62 160 45 Z" fill="#081e11" stroke="#2ed573" stroke-width="1" stroke-opacity="0.4"/>
+
+    <!-- Green Safety Cross Symbol -->
+    <g transform="translate(160, 138)">
+      <rect x="-14" y="-45" width="28" height="90" rx="3" fill="#2ed573"/>
+      <rect x="-45" y="-14" width="90" height="28" rx="3" fill="#2ed573"/>
+      <circle cx="0" cy="0" r="8" fill="#081e11"/>
+    </g>
+
+    <text x="160" y="275" fill="#2ed573" font-family="monospace" font-size="10" font-weight="800" text-anchor="middle">ZERO ACCIDENT • ISO 45001 CERTIFIED</text>
+  </g>
+
+  <!-- Right: Safety Statistics & Inspection Record -->
+  <g transform="translate(420, 110)">
+    <!-- Card 1: Consecutive Safe Working Days Counter -->
+    <rect x="0" y="0" width="320" height="135" rx="8" fill="#0a2113" stroke="rgba(46,213,115,0.3)" stroke-width="1"/>
+    <text x="16" y="25" fill="#ffffff" font-family="sans-serif" font-size="12" font-weight="800">SAFETY MILESTONE RECORD</text>
+    <text x="240" y="25" fill="#2ed573" font-family="monospace" font-size="10" font-weight="800">TARGET 500 D</text>
+
+    <!-- Massive Safe Days Counter Display -->
+    <text x="16" y="78" fill="#2ed573" font-family="sans-serif" font-size="44" font-weight="900">438</text>
+    <text x="115" y="68" fill="#ffffff" font-family="sans-serif" font-size="16" font-weight="800">DAYS</text>
+    <text x="115" y="86" fill="#88d8a7" font-family="sans-serif" font-size="10">WITHOUT LOST TIME ACCIDENT</text>
+
+    <rect x="16" y="105" width="288" height="8" rx="4" fill="#133d24"/>
+    <rect x="16" y="105" width="252" height="8" rx="4" fill="#2ed573"/>
+
+    <!-- Card 2: EHS Audit & PPE Compliance -->
+    <g transform="translate(0, 150)">
+      <rect x="0" y="0" width="152" height="85" rx="6" fill="#0a2113" stroke="rgba(46,213,115,0.3)" stroke-width="1"/>
+      <text x="14" y="24" fill="#88d8a7" font-family="sans-serif" font-size="10" font-weight="700">PPE COMPLIANCE</text>
+      <text x="14" y="54" fill="#2ed573" font-family="sans-serif" font-size="22" font-weight="900">100%</text>
+      <text x="14" y="72" fill="#2ed573" font-family="sans-serif" font-size="10">● ALL ZONES VERIFIED</text>
+
+      <rect x="168" y="0" width="152" height="85" rx="6" fill="#0a2113" stroke="rgba(46,213,115,0.3)" stroke-width="1"/>
+      <text x="182" y="24" fill="#88d8a7" font-family="sans-serif" font-size="10" font-weight="700">AUDIT FINDINGS</text>
+      <text x="182" y="54" fill="#ffffff" font-family="sans-serif" font-size="22" font-weight="900">0 CRITICAL</text>
+      <text x="182" y="72" fill="#88d8a7" font-family="sans-serif" font-size="10">14 ACTIONS RESOLVED</text>
+    </g>
+  </g>
+
+  <!-- Top Channel Header Badge -->
+  <g transform="translate(40, 42)">
+    <rect x="0" y="0" width="70" height="24" rx="4" fill="#2ed573"/>
+    <text x="35" y="16" fill="#04120a" font-family="sans-serif" font-size="12" font-weight="900" text-anchor="middle">CH 08</text>
+    <text x="82" y="17" fill="#ffffff" font-family="sans-serif" font-size="14" font-weight="800" letter-spacing="1">SAFETY BOARD • EHS &amp; ZERO ACCIDENT</text>
+  </g>
+
+  <text x="40" y="420" fill="rgba(255,255,255,0.35)" font-family="monospace" font-size="10">SMW-TV INFOGRAPHIC SYSTEM // SAFETY &amp; ENVIRONMENTAL AUDITING // NODE: EHS-OFFICE-01</text>
+</svg>

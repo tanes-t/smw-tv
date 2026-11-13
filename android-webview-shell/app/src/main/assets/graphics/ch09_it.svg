@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bg09" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#040e14"/>
+      <stop offset="50%" stop-color="#081b26"/>
+      <stop offset="100%" stop-color="#030a0e"/>
+    </linearGradient>
+    <pattern id="grid09" width="30" height="30" patternUnits="userSpaceOnUse">
+      <path d="M 30 0 L 0 0 0 30" fill="none" stroke="rgba(10,189,227,0.06)" stroke-width="1"/>
+    </pattern>
+  </defs>
+
+  <rect width="800" height="450" fill="url(#bg09)"/>
+  <rect width="800" height="450" fill="url(#grid09)"/>
+  <circle cx="260" cy="220" r="150" fill="#0abde3" opacity="0.08" filter="blur(40px)"/>
+
+  <!-- Left: Server Rack Cabinet & Network Switch Blueprint Graphic -->
+  <g transform="translate(60, 110)">
+    <!-- Server Rack Frame -->
+    <rect x="70" y="20" width="180" height="230" rx="6" fill="#081822" stroke="#0abde3" stroke-width="2"/>
+    
+    <!-- Rack Rails and Units -->
+    <!-- Unit 1: Core Router -->
+    <rect x="82" y="32" width="156" height="24" rx="2" fill="#102b3d" stroke="#174461" stroke-width="1"/>
+    <circle cx="95" cy="44" r="3" fill="#46d369"/>
+    <circle cx="105" cy="44" r="3" fill="#46d369"/>
+    <line x1="120" y1="44" x2="225" y2="44" stroke="#0abde3" stroke-width="1" stroke-dasharray="2,2"/>
+
+    <!-- Unit 2: Core Switch 48-Port -->
+    <rect x="82" y="60" width="156" height="24" rx="2" fill="#102b3d" stroke="#174461" stroke-width="1"/>
+    <circle cx="95" cy="72" r="3" fill="#46d369"/>
+    <!-- Ports -->
+    <rect x="110" y="66" width="115" height="12" fill="#0a1c28"/>
+    <line x1="115" y1="72" x2="220" y2="72" stroke="#48dbfb" stroke-width="1" stroke-dasharray="1,2"/>
+
+    <!-- Unit 3: Web & API Gateway -->
+    <rect x="82" y="88" width="156" height="34" rx="2" fill="#102b3d" stroke="#0abde3" stroke-width="1.2"/>
+    <circle cx="95" cy="105" r="4" fill="#48dbfb"/>
+    <text x="115" y="109" fill="#48dbfb" font-family="monospace" font-size="9" font-weight="700">SMW-TV API GATEWAY</text>
+
+    <!-- Unit 4: Database Storage Array -->
+    <rect x="82" y="126" width="156" height="50" rx="2" fill="#102b3d" stroke="#174461" stroke-width="1"/>
+    <rect x="92" y="136" width="28" height="30" fill="#081822" stroke="#0abde3" stroke-width="0.8"/>
+    <rect x="126" y="136" width="28" height="30" fill="#081822" stroke="#0abde3" stroke-width="0.8"/>
+    <rect x="160" y="136" width="28" height="30" fill="#081822" stroke="#0abde3" stroke-width="0.8"/>
+    <rect x="194" y="136" width="28" height="30" fill="#081822" stroke="#0abde3" stroke-width="0.8"/>
+
+    <!-- Unit 5: UPS Power Module -->
+    <rect x="82" y="180" width="156" height="30" rx="2" fill="#102b3d" stroke="#174461" stroke-width="1"/>
+    <text x="95" y="200" fill="#46d369" font-family="monospace" font-size="9" font-weight="700">UPS AC: 220V 100%</text>
+
+    <text x="160" y="268" fill="#48dbfb" font-family="monospace" font-size="9" font-weight="700" text-anchor="middle">DATACENTER RACK R-01 • ONLINE</text>
+  </g>
+
+  <!-- Right: Network Telemetry & Infrastructure Stats -->
+  <g transform="translate(420, 110)">
+    <!-- Card 1: Network Ping & Latency Spectrum -->
+    <rect x="0" y="0" width="320" height="135" rx="8" fill="#081a25" stroke="rgba(10,189,227,0.3)" stroke-width="1"/>
+    <text x="16" y="25" fill="#ffffff" font-family="sans-serif" font-size="12" font-weight="800">INFRASTRUCTURE NETWORK HEALTH</text>
+    <text x="245" y="25" fill="#46d369" font-family="monospace" font-size="10" font-weight="800">LATENCY 12ms</text>
+
+    <!-- Ping Sparkline Waveform -->
+    <path d="M 20 85 L 50 82 L 80 86 L 110 50 L 140 85 L 170 80 L 200 84 L 230 45 L 260 84 L 300 83" fill="none" stroke="#0abde3" stroke-width="2"/>
+    <line x1="20" y1="105" x2="300" y2="105" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+    <text x="20" y="122" fill="#75b5d1" font-family="monospace" font-size="9">GOOGLE APPS SCRIPT SYNC: 100% • HTTP 200 OK</text>
+
+    <!-- Card 2: System Uptime & Nodes -->
+    <g transform="translate(0, 150)">
+      <rect x="0" y="0" width="152" height="85" rx="6" fill="#081a25" stroke="rgba(10,189,227,0.3)" stroke-width="1"/>
+      <text x="14" y="24" fill="#75b5d1" font-family="sans-serif" font-size="10" font-weight="700">SYSTEM UPTIME</text>
+      <text x="14" y="54" fill="#0abde3" font-family="sans-serif" font-size="22" font-weight="900">99.98%</text>
+      <text x="14" y="72" fill="#46d369" font-family="sans-serif" font-size="10">● ALL SERVICES ACTIVE</text>
+
+      <rect x="168" y="0" width="152" height="85" rx="6" fill="#081a25" stroke="rgba(10,189,227,0.3)" stroke-width="1"/>
+      <text x="182" y="24" fill="#75b5d1" font-family="sans-serif" font-size="10" font-weight="700">CONNECTED TVS</text>
+      <text x="182" y="54" fill="#ffffff" font-family="sans-serif" font-size="22" font-weight="900">10 / 10</text>
+      <text x="182" y="72" fill="#46d369" font-family="sans-serif" font-size="10">WEBSOCKET PUSH OK</text>
+    </g>
+  </g>
+
+  <!-- Top Channel Header Badge -->
+  <g transform="translate(40, 42)">
+    <rect x="0" y="0" width="70" height="24" rx="4" fill="#0abde3"/>
+    <text x="35" y="16" fill="#040e14" font-family="sans-serif" font-size="12" font-weight="900" text-anchor="middle">CH 09</text>
+    <text x="82" y="17" fill="#ffffff" font-family="sans-serif" font-size="14" font-weight="800" letter-spacing="1">IT STATUS • SERVERS &amp; NETWORK TELEMETRY</text>
+  </g>
+
+  <text x="40" y="420" fill="rgba(255,255,255,0.35)" font-family="monospace" font-size="10">SMW-TV INFOGRAPHIC SYSTEM // NETWORK INFRASTRUCTURE &amp; CLOUD APIS // NODE: IT-CORE-01</text>
+</svg>

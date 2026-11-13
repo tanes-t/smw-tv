@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bg06" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#05120e"/>
+      <stop offset="50%" stop-color="#0a1f18"/>
+      <stop offset="100%" stop-color="#040d0a"/>
+    </linearGradient>
+    <pattern id="grid06" width="30" height="30" patternUnits="userSpaceOnUse">
+      <path d="M 30 0 L 0 0 0 30" fill="none" stroke="rgba(29,209,161,0.06)" stroke-width="1"/>
+    </pattern>
+  </defs>
+
+  <rect width="800" height="450" fill="url(#bg06)"/>
+  <rect width="800" height="450" fill="url(#grid06)"/>
+  <circle cx="260" cy="220" r="150" fill="#1dd1a1" opacity="0.08" filter="blur(40px)"/>
+
+  <!-- Left: 4-Quadrant CCTV Matrix Surveillance Graphic -->
+  <g transform="translate(60, 110)">
+    <!-- CCTV Video Monitor Shell -->
+    <rect x="10" y="10" width="300" height="210" rx="6" fill="#081813" stroke="#1dd1a1" stroke-width="2"/>
+    
+    <!-- Quadrant Dividing Cross -->
+    <line x1="10" y1="115" x2="310" y2="115" stroke="#1dd1a1" stroke-width="1" opacity="0.6"/>
+    <line x1="160" y1="10" x2="160" y2="220" stroke="#1dd1a1" stroke-width="1" opacity="0.6"/>
+
+    <!-- Cam 1 (Top Left) -->
+    <text x="20" y="28" fill="#1dd1a1" font-family="monospace" font-size="8">CAM-01 [ROBOT WELD A]</text>
+    <circle cx="145" cy="24" r="3" fill="#ff4757"/>
+    <text x="125" y="27" fill="#ff4757" font-family="monospace" font-size="7">REC</text>
+    <!-- AI Bounding Box -->
+    <rect x="45" y="45" width="65" height="50" fill="none" stroke="#1dd1a1" stroke-width="1.2" stroke-dasharray="2,2"/>
+    <text x="45" y="40" fill="#1dd1a1" font-family="monospace" font-size="7">AI: HELMET PASS</text>
+
+    <!-- Cam 2 (Top Right) -->
+    <text x="170" y="28" fill="#1dd1a1" font-family="monospace" font-size="8">CAM-02 [PRESS 250T]</text>
+    <circle cx="295" cy="24" r="3" fill="#ff4757"/>
+    <rect x="200" y="55" width="70" height="45" fill="none" stroke="#10ac84" stroke-width="1.2"/>
+    <text x="200" y="50" fill="#10ac84" font-family="monospace" font-size="7">OPTICAL SENSOR OK</text>
+
+    <!-- Cam 3 (Bottom Left) -->
+    <text x="20" y="132" fill="#1dd1a1" font-family="monospace" font-size="8">CAM-03 [LASER ZONE]</text>
+    <circle cx="145" cy="128" r="3" fill="#ff4757"/>
+    <line x1="50" y1="170" x2="110" y2="170" stroke="#ff4757" stroke-width="1.5"/>
+
+    <!-- Cam 4 (Bottom Right) -->
+    <text x="170" y="132" fill="#1dd1a1" font-family="monospace" font-size="8">CAM-04 [PACKING AGV]</text>
+    <circle cx="295" cy="128" r="3" fill="#ff4757"/>
+    <circle cx="235" cy="170" r="22" fill="none" stroke="#1dd1a1" stroke-width="1" stroke-dasharray="3,3"/>
+  </g>
+
+  <!-- Right: Camera Status Matrix & Analytics -->
+  <g transform="translate(420, 110)">
+    <!-- Card 1: Vision Analytics -->
+    <rect x="0" y="0" width="320" height="135" rx="8" fill="#091b15" stroke="rgba(29,209,161,0.25)" stroke-width="1"/>
+    <text x="16" y="25" fill="#ffffff" font-family="sans-serif" font-size="12" font-weight="800">AI SAFETY VISION WATCH</text>
+    <text x="230" y="25" fill="#1dd1a1" font-family="monospace" font-size="10" font-weight="800">ONLINE (1080P)</text>
+
+    <!-- AI Detection Matrix List -->
+    <g transform="translate(16, 45)">
+      <text x="0" y="10" fill="#78bda8" font-family="monospace" font-size="9">ZONE A: ROBOTIC WORKCELL</text>
+      <text x="220" y="10" fill="#46d369" font-family="monospace" font-size="9">SECURE</text>
+
+      <text x="0" y="32" fill="#78bda8" font-family="monospace" font-size="9">ZONE B: STAMPING CURTAIN</text>
+      <text x="220" y="32" fill="#46d369" font-family="monospace" font-size="9">SECURE</text>
+
+      <text x="0" y="54" fill="#78bda8" font-family="monospace" font-size="9">ZONE C: PALLET AREA</text>
+      <text x="220" y="54" fill="#46d369" font-family="monospace" font-size="9">SECURE</text>
+    </g>
+
+    <!-- Card 2: CCTV Channels & Storage -->
+    <g transform="translate(0, 150)">
+      <rect x="0" y="0" width="152" height="85" rx="6" fill="#091b15" stroke="rgba(29,209,161,0.25)" stroke-width="1"/>
+      <text x="14" y="24" fill="#78bda8" font-family="sans-serif" font-size="10" font-weight="700">CHANNELS LIVE</text>
+      <text x="14" y="54" fill="#1dd1a1" font-family="sans-serif" font-size="22" font-weight="900">12 / 12</text>
+      <text x="14" y="72" fill="#46d369" font-family="sans-serif" font-size="10">● ALL STREAMING</text>
+
+      <rect x="168" y="0" width="152" height="85" rx="6" fill="#091b15" stroke="rgba(29,209,161,0.25)" stroke-width="1"/>
+      <text x="182" y="24" fill="#78bda8" font-family="sans-serif" font-size="10" font-weight="700">NVR RETENTION</text>
+      <text x="182" y="54" fill="#ffffff" font-family="sans-serif" font-size="22" font-weight="900">30 DAYS</text>
+      <text x="182" y="72" fill="#46d369" font-family="sans-serif" font-size="10">CLOUD BACKUP SYNC</text>
+    </g>
+  </g>
+
+  <!-- Top Channel Header Badge -->
+  <g transform="translate(40, 42)">
+    <rect x="0" y="0" width="70" height="24" rx="4" fill="#1dd1a1"/>
+    <text x="35" y="16" fill="#05120e" font-family="sans-serif" font-size="12" font-weight="900" text-anchor="middle">CH 06</text>
+    <text x="82" y="17" fill="#ffffff" font-family="sans-serif" font-size="14" font-weight="800" letter-spacing="1">MACHINE CAMERAS • CCTV &amp; AI VISION</text>
+  </g>
+
+  <text x="40" y="420" fill="rgba(255,255,255,0.35)" font-family="monospace" font-size="10">SMW-TV INFOGRAPHIC SYSTEM // MULTI-CHANNEL CCTV &amp; AI SAFETY EYE // NODE: CAM-SRV-01</text>
+</svg>

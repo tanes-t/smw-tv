@@ -30,3 +30,13 @@ android-webview-shell/app/src/main/assets/assets/
 *.sw?
 
 .vercel
+
+
+# Agent tooling & local temp
+.agent/
+.agents/
+.claude/
+.codex/
+.cursor/
+.gemini/
+0.26.0

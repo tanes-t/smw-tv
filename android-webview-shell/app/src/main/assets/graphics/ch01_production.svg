@@ -1,0 +1,106 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bg01" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a0d14"/>
+      <stop offset="50%" stop-color="#121824"/>
+      <stop offset="100%" stop-color="#080b10"/>
+    </linearGradient>
+    <linearGradient id="redGlow" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ff4757" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#ff6b81" stop-opacity="0.3"/>
+    </linearGradient>
+    <linearGradient id="laserGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff4757"/>
+      <stop offset="50%" stop-color="#ffa502"/>
+      <stop offset="100%" stop-color="#ffffff"/>
+    </linearGradient>
+    <pattern id="grid01" width="30" height="30" patternUnits="userSpaceOnUse">
+      <path d="M 30 0 L 0 0 0 30" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+    </pattern>
+  </defs>
+
+  <!-- Background & Grid -->
+  <rect width="800" height="450" fill="url(#bg01)"/>
+  <rect width="800" height="450" fill="url(#grid01)"/>
+
+  <!-- Ambient Glows -->
+  <circle cx="280" cy="220" r="160" fill="#ff4757" opacity="0.08" filter="blur(40px)"/>
+  <circle cx="600" cy="180" r="140" fill="#ffa502" opacity="0.05" filter="blur(40px)"/>
+
+  <!-- Technical Schematic Lines -->
+  <path d="M 40 80 L 760 80" stroke="rgba(255,71,87,0.2)" stroke-width="1" stroke-dasharray="4,4"/>
+  <path d="M 40 390 L 760 390" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+
+  <!-- Left Side: Robotic Press Graphic Schematic -->
+  <g transform="translate(60, 110)">
+    <!-- Base Plate -->
+    <rect x="20" y="220" width="280" height="16" rx="4" fill="#1e2736" stroke="#2f3b52" stroke-width="1.5"/>
+    <rect x="40" y="200" width="240" height="20" rx="3" fill="#161e2c" stroke="#ff4757" stroke-width="1" stroke-opacity="0.4"/>
+    
+    <!-- Press Columns -->
+    <rect x="50" y="40" width="24" height="160" rx="2" fill="#1b2333" stroke="#2c3a52" stroke-width="1.5"/>
+    <rect x="246" y="40" width="24" height="160" rx="2" fill="#1b2333" stroke="#2c3a52" stroke-width="1.5"/>
+    <line x1="62" y1="40" x2="62" y2="200" stroke="#ff4757" stroke-width="1" stroke-opacity="0.3"/>
+    <line x1="258" y1="40" x2="258" y2="200" stroke="#ff4757" stroke-width="1" stroke-opacity="0.3"/>
+
+    <!-- Top Hydraulic Ram -->
+    <rect x="30" y="20" width="260" height="36" rx="6" fill="#243044" stroke="#3b4d6d" stroke-width="1.5"/>
+    <rect x="110" y="56" width="100" height="60" rx="4" fill="#2d3a50" stroke="#485c7f" stroke-width="1.5"/>
+    <rect x="135" y="116" width="50" height="35" fill="#3a4b68"/>
+    
+    <!-- Stamping Die Tool -->
+    <path d="M 120 151 L 200 151 L 185 185 L 135 185 Z" fill="#ff4757" opacity="0.85"/>
+    
+    <!-- Laser Alignment Beams -->
+    <line x1="160" y1="185" x2="160" y2="200" stroke="url(#laserGrad)" stroke-width="2" stroke-linecap="round"/>
+    <circle cx="160" cy="200" r="5" fill="#ffffff" opacity="0.9"/>
+    <circle cx="160" cy="200" r="14" fill="none" stroke="#ff4757" stroke-width="1.5" stroke-dasharray="3,3"/>
+
+    <!-- Workpiece on Bed -->
+    <rect x="90" y="196" width="140" height="8" rx="2" fill="#e0e6ed"/>
+
+    <!-- Sensor / Axis Annotations -->
+    <text x="32" y="15" fill="#8b9bb4" font-family="monospace" font-size="10" font-weight="700">HEAVY STAMPING PRESS 250T</text>
+    <text x="180" y="105" fill="#ff4757" font-family="monospace" font-size="10" font-weight="800">FORCE: 248.5 KN</text>
+  </g>
+
+  <!-- Right Side: Telemetry Graphs & Automation Stats -->
+  <g transform="translate(420, 110)">
+    <!-- Info Card 1: Production Telemetry Chart -->
+    <rect x="0" y="0" width="320" height="135" rx="8" fill="#101622" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+    <text x="16" y="25" fill="#ffffff" font-family="sans-serif" font-size="12" font-weight="800">REAL-TIME PRODUCTION FLOW</text>
+    <text x="250" y="25" fill="#46d369" font-family="monospace" font-size="10" font-weight="700">98.4% EFF</text>
+    
+    <!-- Sine/Step Production Waveform -->
+    <path d="M 20 100 Q 60 40 100 80 T 180 50 T 260 90 L 300 65" fill="none" stroke="#ff4757" stroke-width="2.5"/>
+    <path d="M 20 100 Q 60 40 100 80 T 180 50 T 260 90 L 300 65 L 300 115 L 20 115 Z" fill="url(#redGlow)" opacity="0.15"/>
+    
+    <!-- Grid markings -->
+    <line x1="20" y1="115" x2="300" y2="115" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+    <circle cx="180" cy="50" r="4" fill="#ffffff"/>
+    <text x="190" y="48" fill="#ff4757" font-family="monospace" font-size="9" font-weight="700">PEAK 1,200 UPH</text>
+
+    <!-- Info Card 2: Metrics Matrix -->
+    <g transform="translate(0, 150)">
+      <rect x="0" y="0" width="152" height="85" rx="6" fill="#101622" stroke="rgba(255,71,87,0.3)" stroke-width="1"/>
+      <text x="14" y="24" fill="#8b9bb4" font-family="sans-serif" font-size="10" font-weight="700">STROKE CYCLE</text>
+      <text x="14" y="54" fill="#ffffff" font-family="sans-serif" font-size="22" font-weight="900">4.20 s</text>
+      <text x="14" y="72" fill="#46d369" font-family="sans-serif" font-size="10">● TARGET 4.5s</text>
+
+      <rect x="168" y="0" width="152" height="85" rx="6" fill="#101622" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+      <text x="182" y="24" fill="#8b9bb4" font-family="sans-serif" font-size="10" font-weight="700">COMPLETION</text>
+      <text x="182" y="54" fill="#ffa502" font-family="sans-serif" font-size="22" font-weight="900">100%</text>
+      <text x="182" y="72" fill="#8b9bb4" font-family="sans-serif" font-size="10">AUTOMOTIVE DUE</text>
+    </g>
+  </g>
+
+  <!-- Top Channel Header Badge -->
+  <g transform="translate(40, 42)">
+    <rect x="0" y="0" width="70" height="24" rx="4" fill="#ff4757"/>
+    <text x="35" y="16" fill="#ffffff" font-family="sans-serif" font-size="12" font-weight="900" text-anchor="middle">CH 01</text>
+    <text x="82" y="17" fill="#ffffff" font-family="sans-serif" font-size="14" font-weight="800" letter-spacing="1">PRODUCTION LIVE • AUTOMOTIVE LINE</text>
+  </g>
+
+  <!-- Bottom Technical Footer Bar -->
+  <text x="40" y="420" fill="rgba(255,255,255,0.35)" font-family="monospace" font-size="10">SMW-TV INFOGRAPHIC SYSTEM // TELEMETRY STAMPING &amp; ROBOTIC CNC // NODE: FACTORY-01</text>
+</svg>

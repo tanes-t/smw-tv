@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bg07" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#080e18"/>
+      <stop offset="50%" stop-color="#0e1a2d"/>
+      <stop offset="100%" stop-color="#050a12"/>
+    </linearGradient>
+    <pattern id="grid07" width="30" height="30" patternUnits="userSpaceOnUse">
+      <path d="M 30 0 L 0 0 0 30" fill="none" stroke="rgba(56,103,214,0.06)" stroke-width="1"/>
+    </pattern>
+  </defs>
+
+  <rect width="800" height="450" fill="url(#bg07)"/>
+  <rect width="800" height="450" fill="url(#grid07)"/>
+  <circle cx="260" cy="220" r="150" fill="#3867d6" opacity="0.08" filter="blur(40px)"/>
+
+  <!-- Left: Town Hall Presentation Stage & Audio Spectrum Graphic -->
+  <g transform="translate(60, 110)">
+    <!-- Stage Platform -->
+    <rect x="20" y="195" width="280" height="15" rx="3" fill="#1b283d" stroke="#3867d6" stroke-width="1.5"/>
+    <rect x="40" y="210" width="240" height="12" fill="#111c2e"/>
+
+    <!-- Main Presentation Screen Display -->
+    <rect x="50" y="40" width="220" height="130" rx="6" fill="#0b1626" stroke="#4b7bec" stroke-width="2"/>
+    
+    <!-- Screen Content: Broadcast Keynote -->
+    <rect x="65" y="55" width="60" height="6" rx="2" fill="#3867d6"/>
+    <text x="65" y="80" fill="#ffffff" font-family="sans-serif" font-size="12" font-weight="900">TOWN HALL 2026</text>
+    <text x="65" y="98" fill="#7fa6db" font-family="sans-serif" font-size="9">SMW QUARTERLY REVIEW</text>
+    <line x1="65" y1="110" x2="190" y2="110" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+
+    <!-- Mini Chart on Screen -->
+    <rect x="65" y="125" width="16" height="30" fill="#3867d6"/>
+    <rect x="85" y="115" width="16" height="40" fill="#4b7bec"/>
+    <rect x="105" y="135" width="16" height="20" fill="#3867d6"/>
+    <rect x="125" y="105" width="16" height="50" fill="#2ed573"/>
+
+    <!-- Stage Podium with Mic -->
+    <path d="M 230 140 L 250 140 L 255 195 L 225 195 Z" fill="#20304a" stroke="#4b7bec" stroke-width="1.2"/>
+    <line x1="240" y1="140" x2="236" y2="128" stroke="#ffffff" stroke-width="2"/>
+    <circle cx="235" cy="126" r="3" fill="#ff4757"/>
+  </g>
+
+  <!-- Right: Town Hall Broadcast Schedule & Status -->
+  <g transform="translate(420, 110)">
+    <!-- Card 1: Broadcast Channel Info -->
+    <rect x="0" y="0" width="320" height="135" rx="8" fill="#0d1b2e" stroke="rgba(56,103,214,0.3)" stroke-width="1"/>
+    <text x="16" y="25" fill="#ffffff" font-family="sans-serif" font-size="12" font-weight="800">INTERNAL BROADCAST FEED</text>
+    <text x="240" y="25" fill="#46d369" font-family="monospace" font-size="10" font-weight="800">ROOM 1 READY</text>
+
+    <!-- Schedule List -->
+    <g transform="translate(16, 45)">
+      <text x="0" y="10" fill="#8cb3e8" font-family="monospace" font-size="9">08:30 MORNING BRIEFING</text>
+      <text x="220" y="10" fill="#46d369" font-family="monospace" font-size="9">COMPLETED</text>
+
+      <text x="0" y="32" fill="#8cb3e8" font-family="monospace" font-size="9">13:30 QUALITY KPI REVIEW</text>
+      <text x="220" y="32" fill="#ff9f43" font-family="monospace" font-size="9">SCHEDULED</text>
+
+      <text x="0" y="54" fill="#8cb3e8" font-family="monospace" font-size="9">16:00 PLANT DAILY SUMMARY</text>
+      <text x="220" y="54" fill="#7fa6db" font-family="monospace" font-size="9">UPCOMING</text>
+    </g>
+
+    <!-- Card 2: Audio/Video Specs -->
+    <g transform="translate(0, 150)">
+      <rect x="0" y="0" width="152" height="85" rx="6" fill="#0d1b2e" stroke="rgba(56,103,214,0.3)" stroke-width="1"/>
+      <text x="14" y="24" fill="#8cb3e8" font-family="sans-serif" font-size="10" font-weight="700">BROADCAST QUALITY</text>
+      <text x="14" y="54" fill="#4b7bec" font-family="sans-serif" font-size="22" font-weight="900">1080p 60</text>
+      <text x="14" y="72" fill="#46d369" font-family="sans-serif" font-size="10">● STEREO AUDIO</text>
+
+      <rect x="168" y="0" width="152" height="85" rx="6" fill="#0d1b2e" stroke="rgba(56,103,214,0.3)" stroke-width="1"/>
+      <text x="182" y="24" fill="#8cb3e8" font-family="sans-serif" font-size="10" font-weight="700">VIEWER COVERAGE</text>
+      <text x="182" y="54" fill="#ffffff" font-family="sans-serif" font-size="22" font-weight="900">ALL ZONES</text>
+      <text x="182" y="72" fill="#46d369" font-family="sans-serif" font-size="10">PLANT WALLBOARDS</text>
+    </g>
+  </g>
+
+  <!-- Top Channel Header Badge -->
+  <g transform="translate(40, 42)">
+    <rect x="0" y="0" width="70" height="24" rx="4" fill="#3867d6"/>
+    <text x="35" y="16" fill="#ffffff" font-family="sans-serif" font-size="12" font-weight="900" text-anchor="middle">CH 07</text>
+    <text x="82" y="17" fill="#ffffff" font-family="sans-serif" font-size="14" font-weight="800" letter-spacing="1">MEETING FEED • TOWN HALL &amp; ANNOUNCEMENTS</text>
+  </g>
+
+  <text x="40" y="420" fill="rgba(255,255,255,0.35)" font-family="monospace" font-size="10">SMW-TV INFOGRAPHIC SYSTEM // INTERNAL BROADCAST &amp; VIDEO CONFERENCING // NODE: MEDIA-01</text>
+</svg>

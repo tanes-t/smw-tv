@@ -12,6 +12,88 @@ export default function ChannelDashboard({
     ? new Date(data.timestamp).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
     : new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
 
+  // Helper to format live planning data (shared between CH 01 and custom channels)
+  const formatPlanningDashboard = (planningData, channelObj, kpiData) => {
+    let totalTarget = 0;
+    let totalActual = 0;
+    let completedCount = 0;
+    let liveRows = [];
+
+    if (Array.isArray(planningData) && planningData.length > 0) {
+      totalTarget = planningData.reduce((sum, r) => sum + (Number(r[6]) || 0), 0);
+      totalActual = planningData.reduce((sum, r) => sum + (Number(r[7]) || 0), 0);
+      completedCount = planningData.filter(r => {
+        const st = String(r[8] || '').toUpperCase();
+        return st === 'COMPLETED' || st === 'FINISH' || st === 'DONE' || st === 'PASS';
+      }).length;
+      liveRows = planningData.map(r => {
+        const target = Number(r[6]) || 0;
+        const actual = Number(r[7]) || 0;
+        const progress = target > 0 ? ((actual / target) * 100).toFixed(1) + '%' : '0%';
+        return [
+          r[2] || '-', // Part No
+          r[3] || '-', // Part Name
+          r[4] || '-', // Customer
+          target.toLocaleString(),
+          actual.toLocaleString(),
+          progress,
+          r[8] || 'PENDING'
+        ];
+      });
+    }
+
+    const effCurrent = kpiData?.efficiency?.current;
+    const planEff = effCurrent !== undefined 
+      ? `${effCurrent}%` 
+      : (totalTarget > 0 ? `${((totalActual / totalTarget) * 100).toFixed(2)}%` : (kpiData?.planEff || '18.24%'));
+
+    const autoRate = kpiData?.planCompletion?.automotive?.current ?? (planningData?.length ? 0 : 100);
+    const totalItems = planningData?.length || 21;
+    const finishedItems = completedCount;
+
+    const targetActualDisplay = planningData?.length
+      ? `${totalActual.toLocaleString()} / ${totalTarget.toLocaleString()}`
+      : '125,169 / 686,049';
+
+    return {
+      subtitle: channelObj.description || 'สายการผลิตหลักและสถานะชิ้นงานปั๊มขึ้นรูป (Main Production Line)',
+      metrics: [
+        {
+          label: 'Total Actual / Target',
+          val: targetActualDisplay,
+          sub: 'Actual / Target (units)',
+          col: 'var(--blue)'
+        },
+        {
+          label: 'Plant Efficiency',
+          val: planEff,
+          sub: 'Σ Actual / Σ Target',
+          col: 'var(--accent)'
+        },
+        {
+          label: 'Status Summary',
+          val: `${finishedItems} / ${totalItems}`,
+          sub: 'Finished / Total Items',
+          col: 'var(--amber)'
+        },
+        {
+          label: 'Automotive Plan Completion',
+          val: `${autoRate}%`,
+          sub: 'อัตราการส่งมอบสายยานยนต์',
+          col: 'var(--focus)'
+        }
+      ],
+      tableTitle: `⚡ PENDING JOBS + OCTOBER PLAN (${planningData?.length ? planningData.length + ' รายการสด' : 'BY DUE'})`,
+      headers: ['Part No', 'Part Name', 'Customer', 'Target', 'Actual', 'Progress', 'Status'],
+      rows: liveRows.length > 0 ? liveRows : [
+        ['UU-CM4513-200', 'INSERT LEAF', 'VC', '218,250', '32,200', '14.8%', 'RUNNING'],
+        ['UU-CM4513-201', 'BRACKET MOUNTING', 'BW', '150,000', '45,600', '30.4%', 'RUNNING'],
+        ['UU-CM4513-202', 'STAY T/C INSULATOR', 'STS', '120,000', '28,100', '23.4%', 'RUNNING'],
+        ['UU-CM4513-203', 'GUARD DEFLECTOR', 'BW', '98,000', '19,269', '19.7%', 'RUNNING']
+      ]
+    };
+  };
+
   // Intelligent parser based on channel and API payload
   const getDashboardData = () => {
     // 1. Direct standard contract from custom API
@@ -29,6 +111,10 @@ export default function ChannelDashboard({
 
     // 2. SMW Central API parser for specific channels
     switch (channel.no) {
+      case '01': { // Production Live
+        return formatPlanningDashboard(data?.planning, channel, kpi);
+      }
+
       case '02': { // QA/QC Live
         const ppm = kpi?.ppm;
         const currentPpm = ppm?.current ?? 0;
@@ -338,6 +424,41 @@ export default function ChannelDashboard({
       }
 
       default: {
+        // If custom channel connects to central API with planning data
+        if (data?.planning && Array.isArray(data.planning) && data.planning.length > 0) {
+          return formatPlanningDashboard(data.planning, channel, kpi);
+        }
+
+        // If custom channel returns live KPI object
+        if (kpi && typeof kpi === 'object') {
+          const kpiEntries = Object.entries(kpi).slice(0, 4);
+          const dynamicMetrics = kpiEntries.map(([k, v]) => {
+            const displayVal = typeof v === 'object' && v !== null ? (v.current ?? v.val ?? JSON.stringify(v)) : v;
+            return {
+              label: k.replace(/([A-Z])/g, ' $1').toUpperCase(),
+              val: String(displayVal),
+              sub: 'Live KPI จาก API ส่วนกลาง',
+              col: 'var(--focus)'
+            };
+          });
+
+          return {
+            subtitle: channel.description || 'ระบบแสดงผลแดชบอร์ดข้อมูลสำหรับ Smart TV',
+            metrics: dynamicMetrics.length >= 4 ? dynamicMetrics : [
+              ...dynamicMetrics,
+              { label: 'Channel Status', val: 'ONLINE', sub: 'รับข้อมูล API สำเร็จ', col: 'var(--focus)' },
+              { label: 'Update Cycle', val: '3 นาที', sub: 'รอบการรีเฟรชข้อมูล', col: 'var(--blue)' }
+            ].slice(0, 4),
+            tableTitle: `📌 ข้อมูลตัวชี้วัดสด ${channel.name} (Live KPI)`,
+            headers: ['ตัวชี้วัด (Key)', 'ค่าปัจจุบัน (Value)', 'สถานะ'],
+            rows: Object.entries(kpi).map(([k, v]) => [
+              k,
+              typeof v === 'object' && v !== null ? (v.current ?? JSON.stringify(v)) : String(v),
+              'ONLINE'
+            ])
+          };
+        }
+
         return {
           subtitle: channel.description || 'ระบบแสดงผลแดชบอร์ดข้อมูลสำหรับ Smart TV',
           metrics: [

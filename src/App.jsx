@@ -1,24 +1,41 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTVNavigation } from './hooks/useTVNavigation';
 import SettingsModal from './components/SettingsModal';
+import SettingsIcon from './components/SettingsIcon';
+import {
+  HomeIcon,
+  MenuIcon,
+  RefreshIcon,
+  ArrowLeftIcon,
+  ArrowUpIcon,
+  ArrowDownIcon,
+  ArrowRightIcon,
+  ArrowLeftSmallIcon
+} from './components/Icons';
 import ChannelDashboard from './components/ChannelDashboard';
+import NetflixGallery from './components/NetflixGallery';
+import IntroMotion from './components/IntroMotion';
 import {
   DEFAULT_REFRESH_INTERVAL_MINUTES,
-  TV_CHANNELS,
+  loadCustomChannels,
+  saveCustomChannels,
   getChannelApiRequestUrl,
-  getChannelStorageKey,
-  getChannelStreamStorageKey,
-  getChannelViewTypeStorageKey,
-  getStoredChannelApiUrl,
-  getStoredStreamUrl,
-  getStoredChannelViewType,
-  isSettingsChannel
+  isSettingsChannel,
+  DEFAULT_TV_CHANNELS,
+  SETTINGS_CHANNEL_NO
 } from './config/tvChannels';
 import { getYouTubeEmbedUrl, isYouTubeUrl } from './utils/youtube';
+import { loadRemoteChannelConfig, saveRemoteChannelConfig } from './services/channelConfig';
 
 const CONTENT_ITEMS = 6;
 
 export default function App() {
+  const [showIntro, setShowIntro] = useState(true);
+  const [viewMode, setViewMode] = useState('gallery'); // 'gallery' | 'live'
+  const [isControlsVisible, setIsControlsVisible] = useState(true);
+  const controlsTimeoutRef = useRef(null);
+  const lastSyncTokenRef = useRef(null);
+  const [channels, setChannels] = useState(() => loadCustomChannels());
   const [activeChannelIdx, setActiveChannelIdx] = useState(0);
   const [isChannelMenuOpen, setIsChannelMenuOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -27,30 +44,6 @@ export default function App() {
   const [isOnline, setIsOnline] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [lastSyncToken, setLastSyncToken] = useState(null);
-
-  // Channel API URLs, Stream URLs, View Types & API Data Map
-  const [channelApiUrls, setChannelApiUrls] = useState(() => (
-    TV_CHANNELS.reduce((acc, channel) => {
-      acc[channel.no] = getStoredChannelApiUrl(channel);
-      return acc;
-    }, {})
-  ));
-
-  const [channelStreamUrls, setChannelStreamUrls] = useState(() => (
-    TV_CHANNELS.reduce((acc, channel) => {
-      acc[channel.no] = getStoredStreamUrl(channel);
-      return acc;
-    }, {})
-  ));
-
-  const [channelViewTypes, setChannelViewTypes] = useState(() => (
-    TV_CHANNELS.reduce((acc, channel) => {
-      acc[channel.no] = getStoredChannelViewType(channel);
-      return acc;
-    }, {})
-  ));
-
   const [channelDataMap, setChannelDataMap] = useState({});
 
   const [refreshInterval, setRefreshInterval] = useState(() => {
@@ -60,13 +53,112 @@ export default function App() {
 
   const [pixelShift, setPixelShift] = useState(0);
 
-  const activeChannel = TV_CHANNELS[activeChannelIdx];
-  const apiUrl = channelApiUrls[activeChannel.no] || activeChannel.apiUrl || '';
-  const streamUrl = channelStreamUrls[activeChannel.no] || activeChannel.streamUrl || apiUrl;
+  const safeActiveIndex = Math.min(Math.max(0, activeChannelIdx), Math.max(0, channels.length - 1));
+  const activeChannel = channels[safeActiveIndex] || channels[0] || {
+    no: '01',
+    name: 'Standby Channel',
+    category: 'Factory',
+    description: 'ระบบสแตนด์บาย',
+    view: 'dashboard'
+  };
+
+  const apiUrl = activeChannel.apiUrl || '';
+  const streamUrl = activeChannel.streamUrl || apiUrl;
   const isYouTubeStream = isYouTubeUrl(streamUrl);
   const playerUrl = isYouTubeStream ? getYouTubeEmbedUrl(streamUrl) : streamUrl;
-  const currentViewType = channelViewTypes[activeChannel.no] || activeChannel.view || 'dashboard';
-  const playableChannels = useMemo(() => TV_CHANNELS.filter((channel) => !isSettingsChannel(channel)), []);
+  const effectiveViewType = activeChannel.view || 'dashboard';
+
+  const playableChannels = useMemo(() => {
+    return channels.filter((channel) => !isSettingsChannel(channel) && channel.enabled !== false);
+  }, [channels]);
+
+  const getChannelName = useCallback((channel) => channel?.name || '', []);
+
+  // Reset auto-hide timer for controls during live playback
+  const resetControlsTimeout = useCallback(() => {
+    setIsControlsVisible(true);
+    if (controlsTimeoutRef.current) {
+      clearTimeout(controlsTimeoutRef.current);
+    }
+    // Only auto-hide in 'live' mode when menus/settings are closed
+    if (viewMode === 'live' && !isChannelMenuOpen && !isSettingsOpen) {
+      controlsTimeoutRef.current = setTimeout(() => {
+        setIsControlsVisible(false);
+      }, 3500);
+    }
+  }, [viewMode, isChannelMenuOpen, isSettingsOpen]);
+
+  // Activity listeners to show controls and reset auto-hide timeout
+  useEffect(() => {
+    if (viewMode !== 'live') {
+      setIsControlsVisible(true);
+      if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
+      return;
+    }
+
+    const handleUserActivity = () => {
+      resetControlsTimeout();
+    };
+
+    window.addEventListener('mousemove', handleUserActivity);
+    window.addEventListener('keydown', handleUserActivity);
+    window.addEventListener('touchstart', handleUserActivity);
+    window.addEventListener('wheel', handleUserActivity);
+
+    // Initial timeout when entering live mode
+    resetControlsTimeout();
+
+    return () => {
+      window.removeEventListener('mousemove', handleUserActivity);
+      window.removeEventListener('keydown', handleUserActivity);
+      window.removeEventListener('touchstart', handleUserActivity);
+      window.removeEventListener('wheel', handleUserActivity);
+      if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
+    };
+  }, [viewMode, resetControlsTimeout]);
+
+  useEffect(() => {
+    let cancelled = false;
+    loadRemoteChannelConfig()
+      .then((configs) => {
+        if (cancelled || !configs || !configs.length) return;
+        setChannels((prev) => {
+          const merged = configs.map(rc => {
+            const no = rc.no || rc.channel_no;
+            const existing = prev.find(p => p.no === no);
+            return {
+              no,
+              key: rc.key || `channel-${no}`,
+              name: rc.name || rc.channel_name || `CH ${no}`,
+              category: rc.category || existing?.category || 'Factory',
+              description: rc.description || existing?.description || '',
+              apiUrl: rc.apiUrl || rc.api_url || '',
+              streamUrl: rc.streamUrl || rc.stream_url || '',
+              view: rc.view || rc.view_type || 'dashboard',
+              streamType: rc.streamType || rc.view_type || 'dashboard',
+              thumbnail: rc.thumbnail || existing?.thumbnail || '/graphics/ch01_production.svg',
+              enabled: existing ? existing.enabled !== false : rc.enabled !== false,
+              hasData: Boolean(rc.apiUrl || rc.api_url),
+              apiAction: rc.apiAction || existing?.apiAction || 'getTVData'
+            };
+          });
+
+          // Ensure settings channel 20 is always present
+          const hasSettings = merged.some(c => c.no === SETTINGS_CHANNEL_NO);
+          if (!hasSettings) {
+            const defaultSettings = DEFAULT_TV_CHANNELS.find(c => c.no === SETTINGS_CHANNEL_NO);
+            if (defaultSettings) merged.push(defaultSettings);
+          }
+
+          saveCustomChannels(merged);
+          return merged;
+        });
+      })
+      .catch(() => {
+        // Local storage remains the offline fallback when the database is not connected.
+      });
+    return () => { cancelled = true; };
+  }, []);
 
   const showToast = useCallback((msg) => {
     setToastMessage(msg);
@@ -74,16 +166,57 @@ export default function App() {
   }, []);
 
   const selectChannel = useCallback((idx) => {
-    const selectedChannel = TV_CHANNELS[idx];
+    const selectedChannel = channels[idx];
+    if (!selectedChannel) return;
+
     if (isSettingsChannel(selectedChannel)) {
       setIsSettingsOpen(true);
       return;
     }
 
     setActiveChannelIdx(idx);
+    setViewMode('live');
     setIsChannelMenuOpen(false);
+    resetControlsTimeout();
     showToast(`กำลังเปิด CH ${selectedChannel.no}: ${selectedChannel.name}`);
-  }, [showToast]);
+  }, [channels, showToast, resetControlsTimeout]);
+
+  // Global key listener for Back/Escape to return to Netflix Gallery
+  useEffect(() => {
+    const handleGlobalBack = (e) => {
+      const targetTag = e.target?.tagName;
+      const isInput = targetTag === 'INPUT' || targetTag === 'TEXTAREA' || targetTag === 'SELECT' || e.target?.isContentEditable;
+
+      // When typing inside any text input or editable element, NEVER intercept Backspace/Delete as navigation!
+      if ((e.key === 'Backspace' || e.key === 'Delete') && isInput) {
+        return;
+      }
+
+      resetControlsTimeout();
+
+      // In Settings modal: ONLY Escape or physical TV remote Back key closes the modal (never Backspace)
+      if (isSettingsOpen) {
+        if (e.key === 'Escape' || e.key === 'Back') {
+          setIsSettingsOpen(false);
+          e.preventDefault();
+        }
+        return;
+      }
+
+      // Outside Settings modal: Escape or Back (or Backspace when not in an input)
+      if (e.key === 'Escape' || e.key === 'Back' || (!isInput && e.key === 'Backspace')) {
+        if (isChannelMenuOpen) {
+          setIsChannelMenuOpen(false);
+          e.preventDefault();
+        } else if (viewMode === 'live') {
+          setViewMode('gallery');
+          e.preventDefault();
+        }
+      }
+    };
+    window.addEventListener('keydown', handleGlobalBack);
+    return () => window.removeEventListener('keydown', handleGlobalBack);
+  }, [isSettingsOpen, isChannelMenuOpen, viewMode, resetControlsTimeout]);
 
   const {
     zone,
@@ -93,7 +226,7 @@ export default function App() {
     setZone,
     setSidebarIndex
   } = useTVNavigation({
-    sidebarCount: TV_CHANNELS.length,
+    sidebarCount: channels.length,
     contentCount: CONTENT_ITEMS,
     onSelectChannel: selectChannel,
     onOpenChannelMenu: () => setIsChannelMenuOpen(true),
@@ -106,6 +239,7 @@ export default function App() {
   const fetchChannelData = useCallback(async (isSilent = false) => {
     // If the channel is pure iframe or settings, don't fetch JSON API unless configured
     if (isSettingsChannel(activeChannel)) return;
+    if (effectiveViewType === 'iframe' && streamUrl) return;
 
     const requestUrl = getChannelApiRequestUrl(activeChannel, apiUrl);
     if (!requestUrl) return;
@@ -117,7 +251,7 @@ export default function App() {
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
       const result = await response.json();
-      if (!result.success && !result.kpi && !result.metrics) {
+      if (!result.success && !result.kpi && !result.metrics && !result.planning) {
         throw new Error(result.error || 'API response format invalid');
       }
 
@@ -128,11 +262,11 @@ export default function App() {
       }));
 
       const configToken = result.kpi?.dashConfig?.refreshTrigger;
-      if (configToken && lastSyncToken && configToken !== lastSyncToken) {
+      if (configToken && lastSyncTokenRef.current && configToken !== lastSyncTokenRef.current) {
         showToast('ได้รับสัญญาณ refresh จากระบบส่วนกลาง');
       }
 
-      setLastSyncToken(configToken || lastSyncToken);
+      lastSyncTokenRef.current = configToken || lastSyncTokenRef.current;
       setIsOnline(true);
       setError(null);
     } catch (err) {
@@ -142,7 +276,7 @@ export default function App() {
     } finally {
       setLoading(false);
     }
-  }, [activeChannel, apiUrl, lastSyncToken, showToast]);
+  }, [activeChannel, apiUrl, effectiveViewType, streamUrl, showToast]);
 
   // Clock ticker
   useEffect(() => {
@@ -185,66 +319,26 @@ export default function App() {
   }, [sidebarIndex, zone]);
 
   // Handle Save Settings from Settings Modal
-  const handleSaveSettings = ({
-    channelNo,
-    apiUrl: newApiUrl,
-    streamUrl: newStreamUrl,
-    viewType: newViewType,
-    refreshInterval: newInterval,
-    applyToAll
-  }) => {
-    if (applyToAll) {
-      // Apply API URL and interval to all playable channels
-      const updatedApis = {};
-      const updatedStreams = {};
-      const updatedViews = {};
-
-      playableChannels.forEach((ch) => {
-        updatedApis[ch.no] = newApiUrl;
-        updatedStreams[ch.no] = newStreamUrl || newApiUrl;
-        updatedViews[ch.no] = ch.no === '01' ? 'iframe' : newViewType;
-
-        localStorage.setItem(getChannelStorageKey(ch.no), newApiUrl);
-        localStorage.setItem(getChannelStreamStorageKey(ch.no), newStreamUrl || newApiUrl);
-        localStorage.setItem(getChannelViewTypeStorageKey(ch.no), updatedViews[ch.no]);
-      });
-
-      setChannelApiUrls((prev) => ({ ...prev, ...updatedApis }));
-      setChannelStreamUrls((prev) => ({ ...prev, ...updatedStreams }));
-      setChannelViewTypes((prev) => ({ ...prev, ...updatedViews }));
-      showToast('บันทึกการตั้งค่า API ให้กับทุกช่องแล้ว');
-    } else {
-      // Save for selected channel
-      setChannelApiUrls((prev) => ({
-        ...prev,
-        [channelNo]: newApiUrl
-      }));
-      setChannelStreamUrls((prev) => ({
-        ...prev,
-        [channelNo]: newStreamUrl
-      }));
-      setChannelViewTypes((prev) => ({
-        ...prev,
-        [channelNo]: newViewType
-      }));
-
-      localStorage.setItem(getChannelStorageKey(channelNo), newApiUrl);
-      localStorage.setItem(getChannelStreamStorageKey(channelNo), newStreamUrl);
-      localStorage.setItem(getChannelViewTypeStorageKey(channelNo), newViewType);
-      showToast(`บันทึกการตั้งค่า CH ${channelNo} แล้ว`);
-    }
-
+  const handleSaveChannels = ({ channels: updatedChannels, refreshInterval: newInterval }) => {
+    setChannels(updatedChannels);
+    saveCustomChannels(updatedChannels);
     setRefreshInterval(newInterval);
     localStorage.setItem('smw_tv_refresh_interval', newInterval.toString());
     setIsSettingsOpen(false);
+    showToast('บันทึกการตั้งค่าช่องทั้งหมดเรียบร้อยแล้ว');
+
+    saveRemoteChannelConfig(updatedChannels).catch(() => {
+      // Local storage fallback remains reliable
+    });
 
     // Trigger re-fetch for active channel
     setTimeout(() => {
       fetchChannelData(false);
-    }, 100);
+    }, 150);
   };
 
   const simulateKeyPress = (keyName) => {
+    resetControlsTimeout();
     const event = new KeyboardEvent('keydown', { key: keyName });
     window.dispatchEvent(event);
   };
@@ -254,175 +348,278 @@ export default function App() {
   const hasLiveChannelData = Boolean(currentChannelData && (currentChannelData.success || currentChannelData.kpi));
 
   return (
-    <div className={`streaming-layout ${isChannelMenuOpen ? 'menu-open' : ''} ${pixelShiftClass}`}>
-      {!isOnline && (
-        <div className="network-status-alert">
-          <div className="reconnect-spinner"></div>
-          <span>{error || 'กำลังเชื่อมต่อแหล่งข้อมูลใหม่'}</span>
-        </div>
+    <>
+      {showIntro && (
+        <IntroMotion onComplete={() => setShowIntro(false)} />
       )}
 
-      {isChannelMenuOpen && (
-        <button
-          className="channel-menu-backdrop"
-          aria-label="Close channel menu"
-          onClick={() => setIsChannelMenuOpen(false)}
+      {viewMode === 'gallery' ? (
+        <NetflixGallery
+          channels={channels.filter(c => c.enabled !== false)}
+          activeChannelIdx={safeActiveIndex}
+          onSelectChannel={(idx) => {
+            const enabledList = channels.filter(c => c.enabled !== false);
+            const targetChannel = enabledList[idx];
+            if (targetChannel) {
+              const fullIdx = channels.findIndex(c => c.no === targetChannel.no);
+              selectChannel(fullIdx !== -1 ? fullIdx : idx);
+            }
+          }}
+          onOpenSettings={() => setIsSettingsOpen(true)}
+          onReplayIntro={() => setShowIntro(true)}
+          clockTime={clockTime}
+          channelDataMap={channelDataMap}
+          isOnline={isOnline}
         />
-      )}
+      ) : (
+        <div className={`streaming-layout ${isChannelMenuOpen ? 'menu-open' : ''} ${pixelShiftClass}`}>
+          {!isOnline && (
+            <div className="network-status-alert">
+              <div className="reconnect-spinner"></div>
+              <span>{error || 'กำลังเชื่อมต่อแหล่งข้อมูลใหม่'}</span>
+            </div>
+          )}
 
-      <aside className="stream-sidebar">
-        <button className="brand-button" onClick={() => setIsSettingsOpen(true)}>
-          <img
-            src="https://raw.githubusercontent.com/tanes-t/smw-assets/main/smw_logo.png"
-            alt="SMW Logo"
-            className="tv-logo"
-          />
-          <span>
-            <strong>SMW STREAM</strong>
-            <small>Google TV • Multi-Channel API</small>
-          </span>
-        </button>
-
-        <div className="rail-title">Live Channels</div>
-        <div className="stream-list">
-          {TV_CHANNELS.map((channel, idx) => {
-            const isFocused = zone === 'sidebar' && sidebarIndex === idx;
-            const isActive = activeChannelIdx === idx;
-            const hasDataActive = Boolean(channelDataMap[channel.no] || channelApiUrls[channel.no] || channel.hasData);
-
-            return (
-              <button
-                key={channel.key}
-                id={`stream-item-${idx}`}
-                className={`stream-item ${isFocused ? 'focused' : ''} ${isActive ? 'active' : ''}`}
-                onClick={() => {
-                  setSidebarIndex(idx);
-                  setZone('sidebar');
-                  selectChannel(idx);
-                }}
-              >
-                <span className="stream-number">{channel.no}</span>
-                <span className="stream-copy">
-                  <strong>{channel.name}</strong>
-                  <small>{channel.category}</small>
-                </span>
-                <span className={`live-dot ${hasDataActive ? 'ready' : ''}`}></span>
-              </button>
-            );
-          })}
-        </div>
-      </aside>
-
-      <main className="stream-stage">
-        <button className="channel-menu-trigger" onClick={() => setIsChannelMenuOpen(true)}>
-          CH MENU
-        </button>
-
-        <header className="stream-header">
-          <div>
-            <span className="eyebrow">CH {activeChannel.no} / {activeChannel.category}</span>
-            <h1>{activeChannel.name}</h1>
-          </div>
-          <div className="clock-block">
-            <strong>{clockTime}</strong>
-            <span>{loading ? 'SYNCING' : hasLiveChannelData ? 'LIVE API' : activeChannel.hasData ? 'LIVE' : 'READY'}</span>
-          </div>
-        </header>
-
-        <section className={`player-shell ${zone === 'content' && contentIndex === 0 ? 'focused' : ''}`}>
-          {currentViewType === 'iframe' && streamUrl ? (
-            <>
-              <iframe
-                src={playerUrl}
-                title={activeChannel.name}
-                allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
-                referrerPolicy="strict-origin-when-cross-origin"
-                className="stream-frame"
-              />
-              {isYouTubeStream && (
-                <a
-                  className="player-external-link"
-                  href={streamUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  เปิดใน YouTube
-                </a>
-              )}
-            </>
-          ) : currentViewType === 'video' && streamUrl ? (
-            <video className="stream-frame" src={streamUrl} controls autoPlay muted playsInline />
-          ) : (
-            <ChannelDashboard
-              channel={activeChannel}
-              data={currentChannelData}
-              apiUrl={apiUrl}
-              isLoading={loading}
-              error={error}
-              focusIndex={contentIndex}
-              focusZone={zone}
+          {isChannelMenuOpen && (
+            <button
+              className="channel-menu-backdrop"
+              aria-label="Close channel menu"
+              onClick={() => setIsChannelMenuOpen(false)}
             />
           )}
 
-          <div className="player-overlay">
-            <span>{activeChannel.category}</span>
-            <strong>{activeChannel.name}</strong>
-          </div>
-        </section>
+          <aside className="stream-sidebar">
+            <button className="brand-button" onClick={() => setIsSettingsOpen(true)}>
+              <img
+                src="https://raw.githubusercontent.com/tanes-t/smw-assets/main/smw_logo.png"
+                alt="SMW Logo"
+                className="tv-logo"
+              />
+              <span>
+                <strong>SMW-TV</strong>
+                <small>Smart Manufacturing • Live</small>
+              </span>
+            </button>
 
-        <section className="content-rail">
-          {playableChannels.slice(0, 5).map((channel, idx) => (
             <button
-              key={channel.key}
-              className={`rail-card ${zone === 'content' && contentIndex === idx + 1 ? 'focused' : ''} ${activeChannel.key === channel.key ? 'active' : ''}`}
-              onClick={() => selectChannel(TV_CHANNELS.findIndex((item) => item.key === channel.key))}
+              className="stream-item stream-home-btn"
+              onClick={() => {
+                setViewMode('gallery');
+                setIsChannelMenuOpen(false);
+              }}
             >
-              <span>{channel.category}</span>
-              <strong>{channel.name}</strong>
-              <small>{channel.description}</small>
+              <span className="stream-number"><HomeIcon size={20} /></span>
+              <span className="stream-copy">
+                <strong>หน้าแรก (แกลอรี่)</strong>
+                <small>Netflix Catalog Mode</small>
+              </span>
             </button>
-          ))}
-        </section>
 
-        <footer className="stream-footer">
-          <span>{activeChannel.description}</span>
-          <div style={{ display: 'flex', gap: '0.6rem' }}>
-            <button className="footer-action" onClick={() => fetchChannelData(false)}>
-              🔄 REFRESH
-            </button>
-            <button className="footer-action" onClick={() => setIsSettingsOpen(true)}>
-              ⚙️ SETTINGS
-            </button>
-          </div>
-        </footer>
-      </main>
+            <div className="rail-title">Live Channels</div>
+            <div className="stream-list">
+              {channels.map((channel, idx) => {
+                const isFocused = zone === 'sidebar' && sidebarIndex === idx;
+                const isActive = activeChannel.no === channel.no;
+                const hasDataActive = Boolean(channelDataMap[channel.no] || channel.apiUrl || channel.hasData);
+                const isVisible = channel.enabled !== false;
+
+                return (
+                  <button
+                    key={channel.key || channel.no}
+                    id={`stream-item-${idx}`}
+                    className={`stream-item ${isFocused ? 'focused' : ''} ${isActive ? 'active' : ''} ${!isVisible ? 'muted-channel' : ''}`}
+                    onClick={() => {
+                      setSidebarIndex(idx);
+                      setZone('sidebar');
+                      selectChannel(idx);
+                    }}
+                  >
+                    <span className={`stream-number ${isSettingsChannel(channel) ? 'settings-channel-icon' : ''}`}>
+                      {isSettingsChannel(channel) ? <SettingsIcon size={22} /> : channel.no}
+                    </span>
+                    <span className="stream-copy">
+                      <strong>{getChannelName(channel)}</strong>
+                      <small>{channel.category}</small>
+                    </span>
+                    <span className={`live-dot ${hasDataActive ? 'ready' : ''}`}></span>
+                  </button>
+                );
+              })}
+            </div>
+          </aside>
+
+          <main className={`stream-stage ${!isControlsVisible ? 'controls-hidden' : ''}`}>
+            {/* Top sensor to wake controls immediately when hovering near top edge */}
+            <div className="stream-top-sensor" onMouseEnter={resetControlsTimeout} />
+
+            {/* Unified TV Header Bar (Rearranged & non-overlapping) */}
+            <header className={`stream-top-bar ${!isControlsVisible ? 'hidden' : ''}`} onMouseEnter={resetControlsTimeout}>
+              <div className="top-bar-left">
+                <button
+                  className="top-bar-btn gallery-btn"
+                  onClick={() => setViewMode('gallery')}
+                  title="กลับสู่หน้าแกลอรี่ (Netflix Catalog)"
+                >
+                  <span className="btn-icon"><ArrowLeftIcon size={16} /></span>
+                  <span>หน้าแรก (แกลอรี่)</span>
+                </button>
+
+                <button
+                  className="top-bar-btn channel-menu-btn"
+                  onClick={() => setIsChannelMenuOpen(true)}
+                  title="เปิดเมนูเลือกช่อง (กด ☰ หรือ Menu บนรีโมท)"
+                >
+                  <span className="btn-icon"><MenuIcon size={16} /></span>
+                  <span>รายการช่อง</span>
+                </button>
+              </div>
+
+              <div className="top-bar-center">
+                <div className="channel-badge-chip">
+                  <span className="channel-chip-no">CH {activeChannel.no}</span>
+                  <span className="channel-chip-divider">•</span>
+                  <span className="channel-chip-name">{getChannelName(activeChannel)}</span>
+                  <span className="channel-chip-tag">{activeChannel.category}</span>
+                </div>
+              </div>
+
+              <div className="top-bar-right">
+                <div className="top-clock-chip">
+                  <strong>{clockTime}</strong>
+                  <span className={`live-status-pill ${loading ? 'syncing' : hasLiveChannelData ? 'live' : 'standby'}`}>
+                    {loading ? '● SYNCING' : hasLiveChannelData ? '● LIVE' : activeChannel.hasData ? '● ON AIR' : '○ STANDBY'}
+                  </span>
+                </div>
+
+                <button
+                  className="top-bar-icon-btn"
+                  onClick={() => fetchChannelData(false)}
+                  title="รีเฟรชข้อมูล (Refresh)"
+                  aria-label="รีเฟรชข้อมูล"
+                >
+                  <RefreshIcon size={16} spinning={loading} />
+                </button>
+
+                <button
+                  className="top-bar-btn settings-btn"
+                  onClick={() => setIsSettingsOpen(true)}
+                  title="ตั้งค่าระบบและช่อง (Settings)"
+                >
+                  <SettingsIcon size={16} />
+                  <span>ตั้งค่า</span>
+                </button>
+              </div>
+            </header>
+
+            <section className={`player-shell ${zone === 'content' && contentIndex === 0 ? 'focused' : ''}`}>
+              {effectiveViewType === 'iframe' && streamUrl ? (
+                <>
+                  <iframe
+                    src={playerUrl}
+                    title={getChannelName(activeChannel)}
+                    allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
+                    referrerPolicy="strict-origin-when-cross-origin"
+                    className="stream-frame"
+                  />
+                  {isYouTubeStream && (
+                    <a
+                      className="player-external-link"
+                      href={streamUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      เปิดใน YouTube
+                    </a>
+                  )}
+                </>
+              ) : effectiveViewType === 'video' && streamUrl ? (
+                <video className="stream-frame" src={streamUrl} controls autoPlay muted playsInline />
+              ) : (
+                <ChannelDashboard
+                  channel={activeChannel}
+                  data={currentChannelData}
+                  apiUrl={apiUrl}
+                  isLoading={loading}
+                  error={error}
+                  focusIndex={contentIndex}
+                  focusZone={zone}
+                />
+              )}
+
+              <div className="player-overlay">
+                <span>{activeChannel.category}</span>
+                <strong>{getChannelName(activeChannel)}</strong>
+              </div>
+            </section>
+
+            <section className={`content-rail ${!isControlsVisible ? 'hidden' : ''}`}>
+              {playableChannels.slice(0, 5).map((channel, idx) => (
+                <button
+                  key={channel.key}
+                  className={`rail-card ${zone === 'content' && contentIndex === idx + 1 ? 'focused' : ''} ${activeChannel.key === channel.key ? 'active' : ''}`}
+                  onClick={() => selectChannel(TV_CHANNELS.findIndex((item) => item.key === channel.key))}
+                >
+                  <span>{channel.category}</span>
+                  <strong>{getChannelName(channel)}</strong>
+                  <small>{channel.description}</small>
+                </button>
+              ))}
+            </section>
+
+            <footer className={`stream-footer ${!isControlsVisible ? 'hidden' : ''}`}>
+              <span>{activeChannel.description}</span>
+              <div style={{ display: 'flex', gap: '0.6rem' }}>
+                <button className="footer-action" onClick={() => fetchChannelData(false)}>
+                  <RefreshIcon size={14} spinning={loading} />
+                  <span>REFRESH</span>
+                </button>
+                <button className="footer-action settings-action" onClick={() => setIsSettingsOpen(true)}>
+                  <SettingsIcon size={14} />
+                  <span>SETTINGS</span>
+                </button>
+              </div>
+            </footer>
+          </main>
+        </div>
+      )}
 
       <SettingsModal
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
-        onSave={handleSaveSettings}
+        channels={channels}
+        onSaveChannels={handleSaveChannels}
         currentChannelNo={activeChannel.no}
         currentInterval={refreshInterval}
-        focusIndex={settingsIndex}
       />
 
       {toastMessage && <div className="tv-toast">{toastMessage}</div>}
 
-      <div className="virtual-remote">
-        <span className="remote-title">Remote</span>
-        <button className="remote-menu-btn" onClick={() => simulateKeyPress('Menu')}>CH MENU</button>
+      <div className={`virtual-remote ${!isControlsVisible ? 'hidden' : ''}`}>
+        <span className="remote-title">TV REMOTE</span>
+        <button className="remote-menu-btn" onClick={() => simulateKeyPress('Menu')}>
+          <MenuIcon size={14} />
+          <span>MENU</span>
+        </button>
         <div className="remote-row">
-          <button className="remote-btn" onClick={() => simulateKeyPress('ArrowUp')}>▲</button>
+          <button className="remote-btn" onClick={() => simulateKeyPress('ArrowUp')} aria-label="Up">
+            <ArrowUpIcon size={16} />
+          </button>
         </div>
         <div className="remote-row">
-          <button className="remote-btn" onClick={() => simulateKeyPress('ArrowLeft')}>◀</button>
+          <button className="remote-btn" onClick={() => simulateKeyPress('ArrowLeft')} aria-label="Left">
+            <ArrowLeftSmallIcon size={16} />
+          </button>
           <button className="remote-btn enter-btn" onClick={() => simulateKeyPress('Enter')}>OK</button>
-          <button className="remote-btn" onClick={() => simulateKeyPress('ArrowRight')}>▶</button>
+          <button className="remote-btn" onClick={() => simulateKeyPress('ArrowRight')} aria-label="Right">
+            <ArrowRightIcon size={16} />
+          </button>
         </div>
         <div className="remote-row">
-          <button className="remote-btn" onClick={() => simulateKeyPress('ArrowDown')}>▼</button>
+          <button className="remote-btn" onClick={() => simulateKeyPress('ArrowDown')} aria-label="Down">
+            <ArrowDownIcon size={16} />
+          </button>
         </div>
       </div>
-    </div>
+    </>
   );
 }

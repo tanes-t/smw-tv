@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bg10" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#140608"/>
+      <stop offset="50%" stop-color="#240c10"/>
+      <stop offset="100%" stop-color="#0e0405"/>
+    </linearGradient>
+    <pattern id="grid10" width="30" height="30" patternUnits="userSpaceOnUse">
+      <path d="M 30 0 L 0 0 0 30" fill="none" stroke="rgba(232,65,24,0.06)" stroke-width="1"/>
+    </pattern>
+  </defs>
+
+  <rect width="800" height="450" fill="url(#bg10)"/>
+  <rect width="800" height="450" fill="url(#grid10)"/>
+  <circle cx="260" cy="220" r="150" fill="#e84118" opacity="0.08" filter="blur(40px)"/>
+
+  <!-- Left: Executive KPI Multi-Bar Growth Chart Graphic -->
+  <g transform="translate(60, 110)">
+    <!-- Base Plate Line -->
+    <line x1="20" y1="210" x2="300" y2="210" stroke="#e84118" stroke-width="2"/>
+    <line x1="20" y1="50" x2="20" y2="210" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+
+    <!-- Bar 1: Automotive -->
+    <rect x="40" y="70" width="36" height="140" rx="3" fill="#e84118"/>
+    <text x="58" y="60" fill="#ffffff" font-family="monospace" font-size="10" font-weight="800" text-anchor="middle">100%</text>
+    <text x="58" y="225" fill="#d98980" font-family="monospace" font-size="9" text-anchor="middle">AUTO</text>
+
+    <!-- Bar 2: Welding -->
+    <rect x="95" y="82" width="36" height="128" rx="3" fill="#c23616"/>
+    <text x="113" y="72" fill="#ffffff" font-family="monospace" font-size="10" font-weight="800" text-anchor="middle">96.8%</text>
+    <text x="113" y="225" fill="#d98980" font-family="monospace" font-size="9" text-anchor="middle">WELD</text>
+
+    <!-- Bar 3: Coating -->
+    <rect x="150" y="75" width="36" height="135" rx="3" fill="#e84118"/>
+    <text x="168" y="65" fill="#ffffff" font-family="monospace" font-size="10" font-weight="800" text-anchor="middle">98.8%</text>
+    <text x="168" y="225" fill="#d98980" font-family="monospace" font-size="9" text-anchor="middle">COAT</text>
+
+    <!-- Bar 4: Stamping -->
+    <rect x="205" y="78" width="36" height="132" rx="3" fill="#c23616"/>
+    <text x="223" y="68" fill="#ffffff" font-family="monospace" font-size="10" font-weight="800" text-anchor="middle">97.7%</text>
+    <text x="223" y="225" fill="#d98980" font-family="monospace" font-size="9" text-anchor="middle">STAMP</text>
+
+    <!-- Growth Trajectory Trend Curve -->
+    <path d="M 58 70 Q 113 75 168 65 T 278 45" fill="none" stroke="#fbc531" stroke-width="2.5"/>
+    <circle cx="278" cy="45" r="4" fill="#fbc531"/>
+    <text x="278" y="35" fill="#fbc531" font-family="monospace" font-size="9" font-weight="800" text-anchor="middle">+4.2% YoY</text>
+  </g>
+
+  <!-- Right: Executive KPI Stats Matrix -->
+  <g transform="translate(420, 110)">
+    <!-- Card 1: Plant Overall Performance Score -->
+    <rect x="0" y="0" width="320" height="135" rx="8" fill="#1f0a0d" stroke="rgba(232,65,24,0.3)" stroke-width="1"/>
+    <text x="16" y="25" fill="#ffffff" font-family="sans-serif" font-size="12" font-weight="800">PLANT OVERALL EFFICIENCY (OEE)</text>
+    <text x="245" y="25" fill="#46d369" font-family="monospace" font-size="10" font-weight="800">EXCELLENT</text>
+
+    <text x="16" y="80" fill="#e84118" font-family="sans-serif" font-size="44" font-weight="900">98.3%</text>
+    <text x="175" y="70" fill="#ffffff" font-family="sans-serif" font-size="14" font-weight="800">TARGET: &gt; 95%</text>
+    <text x="175" y="88" fill="#46d369" font-family="sans-serif" font-size="10">● ALL 4 LINES ON GOAL</text>
+
+    <!-- Card 2: Production Volume & Defect Rate -->
+    <g transform="translate(0, 150)">
+      <rect x="0" y="0" width="152" height="85" rx="6" fill="#1f0a0d" stroke="rgba(232,65,24,0.3)" stroke-width="1"/>
+      <text x="14" y="24" fill="#d98980" font-family="sans-serif" font-size="10" font-weight="700">TOTAL OUTPUT</text>
+      <text x="14" y="54" fill="#e84118" font-family="sans-serif" font-size="22" font-weight="900">90.5k</text>
+      <text x="14" y="72" fill="#46d369" font-family="sans-serif" font-size="10">PARTS DELIVERED</text>
+
+      <rect x="168" y="0" width="152" height="85" rx="6" fill="#1f0a0d" stroke="rgba(232,65,24,0.3)" stroke-width="1"/>
+      <text x="182" y="24" fill="#d98980" font-family="sans-serif" font-size="10" font-weight="700">PLANT DEFECT</text>
+      <text x="182" y="54" fill="#ffffff" font-family="sans-serif" font-size="22" font-weight="900">0.07%</text>
+      <text x="182" y="72" fill="#46d369" font-family="sans-serif" font-size="10">WORLD CLASS STD</text>
+    </g>
+  </g>
+
+  <!-- Top Channel Header Badge -->
+  <g transform="translate(40, 42)">
+    <rect x="0" y="0" width="70" height="24" rx="4" fill="#e84118"/>
+    <text x="35" y="16" fill="#ffffff" font-family="sans-serif" font-size="12" font-weight="900" text-anchor="middle">CH 10</text>
+    <text x="82" y="17" fill="#ffffff" font-family="sans-serif" font-size="14" font-weight="800" letter-spacing="1">EXECUTIVE SUMMARY • PLANT MANAGEMENT</text>
+  </g>
+
+  <text x="40" y="420" fill="rgba(255,255,255,0.35)" font-family="monospace" font-size="10">SMW-TV INFOGRAPHIC SYSTEM // EXECUTIVE MANAGEMENT DASHBOARD // NODE: HQ-MGMT-01</text>
+</svg>

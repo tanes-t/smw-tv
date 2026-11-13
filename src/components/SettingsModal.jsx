@@ -1,243 +1,864 @@
 import { useState, useEffect } from 'react';
 import {
-  TV_CHANNELS,
   isSettingsChannel,
-  getStoredChannelApiUrl,
-  getStoredStreamUrl,
-  getStoredChannelViewType
+  getNextChannelNumber,
+  CHANNEL_TEMPLATES,
+  DEFAULT_PRODUCTION_API_URL
 } from '../config/tvChannels';
+import SettingsIcon from './SettingsIcon';
+import {
+  CloseIcon,
+  BoltIcon,
+  CheckIcon,
+  AlertCircleIcon,
+  SaveIcon,
+  PlusIcon,
+  TrashIcon,
+  CopyIcon,
+  EyeIcon,
+  EyeOffIcon,
+  RotateCcwIcon,
+  DownloadIcon,
+  UploadIcon,
+  ChevronUpIcon,
+  ChevronDownIcon,
+  ExternalLinkIcon
+} from './Icons';
+
+const THUMBNAIL_OPTIONS = [
+  { label: '🏭 ฝ่ายผลิต (Production)', value: '/graphics/ch01_production.svg' },
+  { label: '🔍 ประกันคุณภาพ (QA/QC)', value: '/graphics/ch02_qa.svg' },
+  { label: '📦 คลังสินค้า (Warehouse)', value: '/graphics/ch03_warehouse.svg' },
+  { label: '⚙️ ซ่อมบำรุง (Maintenance)', value: '/graphics/ch04_maintenance.svg' },
+  { label: '🚚 ขนส่ง & ส่งมอบ (Dispatch)', value: '/graphics/ch05_dispatch.svg' },
+  { label: '🔒 กล้องวงจรปิด (CCTV)', value: '/graphics/ch06_cctv.svg' },
+  { label: '📢 ประชุม & ประกาศ (Meeting)', value: '/graphics/ch07_meeting.svg' },
+  { label: '🛡️ ความปลอดภัย (Safety EHS)', value: '/graphics/ch08_safety.svg' },
+  { label: '💻 ไอที & เครือข่าย (IT Status)', value: '/graphics/ch09_it.svg' },
+  { label: '📊 ผู้บริหาร (Executive KPI)', value: '/graphics/ch10_executive.svg' }
+];
+
+const CATEGORY_OPTIONS = [
+  'Factory',
+  'Logistics',
+  'CCTV',
+  'Internal',
+  'Management',
+  'Safety',
+  'Quality',
+  'Maintenance'
+];
 
 export default function SettingsModal({
   isOpen,
   onClose,
-  onSave,
+  channels = [],
+  onSaveChannels,
   currentChannelNo = '01',
-  currentInterval = 3,
-  focusIndex = 0
+  currentInterval = 3
 }) {
-  const [selectedChannelNo, setSelectedChannelNo] = useState(currentChannelNo);
-  const [apiUrl, setApiUrl] = useState('');
-  const [streamUrl, setStreamUrl] = useState('');
-  const [viewType, setViewType] = useState('dashboard');
+  const [channelList, setChannelList] = useState([]);
+  const [selectedNo, setSelectedNo] = useState(currentChannelNo);
   const [refreshInterval, setRefreshInterval] = useState(currentInterval);
-  const [testStatus, setTestStatus] = useState(null); // { loading, success, message }
-  const [applyToAll, setApplyToAll] = useState(false);
+  const [testStatus, setTestStatus] = useState(null);
+  const [deleteConfirmNo, setDeleteConfirmNo] = useState(null);
+  const [jsonBackupOpen, setJsonBackupOpen] = useState(false);
+  const [jsonInput, setJsonInput] = useState('');
+  const [toastMessage, setToastMessage] = useState('');
+  const [applyToAllApi, setApplyToAllApi] = useState(false);
 
-  const playableChannels = TV_CHANNELS.filter(ch => !isSettingsChannel(ch));
-
-  // Load configuration for the selected channel whenever modal opens or channel changes
+  // Synchronize working state whenever modal opens or channels prop updates
   useEffect(() => {
-    // Defer state updates to avoid setState-in-effect warning
-    // Use setTimeout to flush DOM before synchronizing state
-    const cleanup = setTimeout(() => {
-      if (!isOpen) return;
-
-      const ch = TV_CHANNELS.find(c => c.no === selectedChannelNo) || TV_CHANNELS[0];
-      const storedApi = getStoredChannelApiUrl(ch);
-      const storedStream = getStoredStreamUrl(ch);
-      const storedView = getStoredChannelViewType(ch);
-
-      setApiUrl(storedApi || ch.apiUrl || '');
-      setStreamUrl(storedStream || ch.streamUrl || '');
-      setViewType(storedView || ch.view || 'dashboard');
+    if (isOpen) {
+      const copy = JSON.parse(JSON.stringify(channels));
+      setChannelList(copy);
+      setSelectedNo(currentChannelNo || (copy[0]?.no || '01'));
       setRefreshInterval(currentInterval || 3);
       setTestStatus(null);
-    }, 0);
-    return () => clearTimeout(cleanup);
-  }, [isOpen, selectedChannelNo, currentInterval]);
+      setDeleteConfirmNo(null);
+      setJsonBackupOpen(false);
+    }
+  }, [isOpen, channels, currentChannelNo, currentInterval]);
 
   if (!isOpen) return null;
 
-  const handleChannelChange = (e) => {
-    setSelectedChannelNo(e.target.value);
+  const showToast = (msg) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(''), 2600);
   };
 
-  const handleTestApi = async () => {
-    if (!apiUrl) {
-      setTestStatus({ loading: false, success: false, message: 'กรุณากรอก API URL ก่อนทดสอบ' });
+  const playableChannels = channelList.filter(ch => !isSettingsChannel(ch));
+  const activeEditingChannel = channelList.find(ch => ch.no === selectedNo) || playableChannels[0] || null;
+
+  // Handle single field change in active channel
+  const handleUpdateField = (field, value) => {
+    if (!activeEditingChannel) return;
+    setChannelList(prev => prev.map(ch => {
+      if (ch.no !== activeEditingChannel.no) return ch;
+      const updated = { ...ch, [field]: value };
+      if (field === 'apiUrl' && !ch.streamUrl && ch.view === 'iframe') {
+        updated.streamUrl = value;
+      }
+      return updated;
+    }));
+  };
+
+  // Toggle channel visibility (enabled/disabled)
+  const handleToggleVisibility = (no, e) => {
+    if (e) e.stopPropagation();
+    setChannelList(prev => prev.map(ch => {
+      if (ch.no === no) {
+        const nextEnabled = ch.enabled === false;
+        showToast(`ช่อง CH ${no} ${nextEnabled ? 'เปิดใช้งาน' : 'ซ่อนการแสดงผล'}`);
+        return { ...ch, enabled: nextEnabled };
+      }
+      return ch;
+    }));
+  };
+
+  // Move channel up / down in order
+  const handleMoveChannel = (index, direction, e) => {
+    if (e) e.stopPropagation();
+    const newIdx = index + direction;
+    if (newIdx < 0 || newIdx >= playableChannels.length) return;
+
+    const playables = [...playableChannels];
+    const temp = playables[index];
+    playables[index] = playables[newIdx];
+    playables[newIdx] = temp;
+
+    const settingsCh = channelList.find(ch => isSettingsChannel(ch));
+    setChannelList(settingsCh ? [...playables, settingsCh] : playables);
+  };
+
+  // Add a new channel
+  const handleAddNewChannel = () => {
+    const nextNo = getNextChannelNumber(channelList);
+    const newChannel = {
+      no: nextNo,
+      key: `channel-${nextNo}-${Date.now()}`,
+      name: `Line ${nextNo} Live`,
+      category: 'Factory',
+      description: 'มอนิเตอร์กระบวนการทำงานและตัวชี้วัดประสิทธิภาพแบบเรียลไทม์',
+      view: 'dashboard',
+      streamType: 'dashboard',
+      apiUrl: DEFAULT_PRODUCTION_API_URL,
+      apiAction: 'getTVData',
+      streamUrl: '',
+      thumbnail: '/graphics/ch01_production.svg',
+      hasData: true,
+      enabled: true,
+      isCustom: true
+    };
+
+    const settingsCh = channelList.find(ch => isSettingsChannel(ch));
+    const nextList = settingsCh
+      ? [...playableChannels, newChannel, settingsCh]
+      : [...playableChannels, newChannel];
+
+    setChannelList(nextList);
+    setSelectedNo(nextNo);
+    setTestStatus(null);
+    showToast(`เพิ่มช่องใหม่ CH ${nextNo} เรียบร้อยแล้ว`);
+  };
+
+  // Clone active channel
+  const handleCloneChannel = (sourceChannel, e) => {
+    if (e) e.stopPropagation();
+    const source = sourceChannel || activeEditingChannel;
+    if (!source) return;
+
+    const nextNo = getNextChannelNumber(channelList);
+    const cloned = {
+      ...source,
+      no: nextNo,
+      key: `channel-${nextNo}-${Date.now()}`,
+      name: `${source.name} (Copy)`,
+      enabled: true,
+      isCustom: true
+    };
+
+    const settingsCh = channelList.find(ch => isSettingsChannel(ch));
+    const nextList = settingsCh
+      ? [...playableChannels, cloned, settingsCh]
+      : [...playableChannels, cloned];
+
+    setChannelList(nextList);
+    setSelectedNo(nextNo);
+    showToast(`โคลนช่องเป็น CH ${nextNo} เรียบร้อยแล้ว`);
+  };
+
+  // Apply a template preset to active channel
+  const handleApplyTemplate = (template) => {
+    if (!activeEditingChannel) return;
+    setChannelList(prev => prev.map(ch => {
+      if (ch.no !== activeEditingChannel.no) return ch;
+      return {
+        ...ch,
+        category: template.category,
+        description: template.description,
+        view: template.view,
+        streamType: template.view,
+        apiUrl: template.apiUrl ?? (template.view === 'dashboard' ? ch.apiUrl : ''),
+        apiAction: template.apiAction ?? (template.view === 'dashboard' ? ch.apiAction : 'getTVData'),
+        streamUrl: template.streamUrl ?? (template.view !== 'dashboard' ? ch.streamUrl : ''),
+        thumbnail: template.thumbnail || ch.thumbnail
+      };
+    }));
+    setTestStatus(null);
+    showToast(`นำแม่แบบ ${template.name} มาปรับใช้แล้ว`);
+  };
+
+  // Delete channel safely with confirmation
+  const handleDeleteChannel = (no) => {
+    if (playableChannels.length <= 1) {
+      showToast('ไม่สามารถลบช่องได้ ต้องมีช่องอย่างน้อย 1 ช่องในระบบ');
+      setDeleteConfirmNo(null);
       return;
     }
 
-    setTestStatus({ loading: true, success: false, message: 'กำลังเชื่อมต่อไปยัง API...' });
-    try {
-      const startTime = performance.now();
-      const testUrl = `${apiUrl}${apiUrl.includes('?') ? '&' : '?'}action=getTVData`;
-      const response = await fetch(testUrl);
-      const elapsed = Math.round(performance.now() - startTime);
+    const updated = channelList.filter(ch => ch.no !== no);
+    setChannelList(updated);
+    setDeleteConfirmNo(null);
 
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
+    if (selectedNo === no) {
+      const remainingPlayables = updated.filter(ch => !isSettingsChannel(ch));
+      setSelectedNo(remainingPlayables[0]?.no || '01');
+    }
+    showToast(`ลบช่อง CH ${no} แล้ว`);
+  };
 
-      const json = await response.json();
-      if (json && (json.success || json.kpi || json.metrics)) {
-        setTestStatus({
-          loading: false,
-          success: true,
-          message: `✅ เชื่อมต่อสำเร็จ! ตอบกลับใน ${elapsed}ms (พบข้อมูลระบบ)`
-        });
-      } else {
-        setTestStatus({
-          loading: false,
-          success: true,
-          message: `✅ ได้รับการตอบกลับจาก API (${elapsed}ms) แต่รูปแบบข้อมูลอาจต้องตรวจสอบ`
-        });
-      }
-    } catch (err) {
+  // Test API endpoint live
+  const handleTestApi = async () => {
+    if (!activeEditingChannel?.apiUrl) {
       setTestStatus({
         loading: false,
         success: false,
-        message: `❌ เชื่อมต่อไม่สำเร็จ: ${err.message}`
+        message: 'กรุณากรอก API Endpoint URL ก่อนทดสอบ',
+        previewKeys: []
+      });
+      return;
+    }
+
+    setTestStatus({ loading: true, success: false, message: 'กำลังทดสอบเชื่อมต่อไปยัง API...', previewKeys: [] });
+    const startTime = performance.now();
+
+    try {
+      const action = activeEditingChannel.apiAction || 'getTVData';
+      const sep = activeEditingChannel.apiUrl.includes('?') ? '&' : '?';
+      const testUrl = `${activeEditingChannel.apiUrl}${sep}action=${action}&channel=${activeEditingChannel.no}`;
+      const response = await fetch(testUrl);
+      const elapsed = Math.round(performance.now() - startTime);
+
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const json = await response.json();
+
+      const detected = [];
+      if (json.kpi) {
+        if (json.kpi.planEff) detected.push(`Plan Efficiency: ${json.kpi.planEff}`);
+        if (json.kpi.actualQty) detected.push(`Actual Qty: ${Number(json.kpi.actualQty).toLocaleString()}`);
+        if (json.kpi.targetQty) detected.push(`Target: ${Number(json.kpi.targetQty).toLocaleString()}`);
+      }
+      if (json.planning && Array.isArray(json.planning)) {
+        detected.push(`Planning Data (${json.planning.length} รายการ)`);
+      }
+      if (json.metrics && Array.isArray(json.metrics)) {
+        detected.push(`Custom Metrics (${json.metrics.length} ตัวชี้วัด)`);
+      }
+      if (!detected.length) {
+        detected.push('ตอบกลับสำเร็จ แต่ใช้โครงสร้างข้อมูลแบบกำหนดเอง');
+      }
+
+      setTestStatus({
+        loading: false,
+        success: true,
+        message: `เชื่อมต่อสำเร็จ ตอบกลับใน ${elapsed}ms`,
+        previewKeys: detected
+      });
+    } catch (err) {
+      let friendlyMsg = `เชื่อมต่อไม่สำเร็จ: ${err.message}`;
+      if (err.message && err.message.includes('Failed to fetch')) {
+        friendlyMsg = 'เชื่อมต่อไม่สำเร็จ (Failed to fetch): โดเมนปลายทางไม่ได้เปิด CORS หรือ URL นี้เป็นหน้าเว็บ HTML ทั่วไปไม่ใช่ REST API JSON (หากต้องการเปิดหน้าเว็บ ให้เลือกรูปแบบเป็น "Web Iframe" และกรอกในช่อง URL หน้าเว็บแทน)';
+      }
+      setTestStatus({
+        loading: false,
+        success: false,
+        message: friendlyMsg,
+        previewKeys: []
       });
     }
   };
 
-  const handleSubmit = (e) => {
-    if (e) e.preventDefault();
-    onSave({
-      channelNo: selectedChannelNo,
-      apiUrl,
-      streamUrl,
-      viewType,
-      refreshInterval: parseInt(refreshInterval) || 3,
-      applyToAll
+  // Export JSON configuration to clipboard
+  const handleExportJson = () => {
+    const dataStr = JSON.stringify(channelList, null, 2);
+    navigator.clipboard.writeText(dataStr).then(() => {
+      showToast('คัดลอกไฟล์ JSON ไปยังคลิปบอร์ดแล้ว');
+    }).catch(() => {
+      setJsonInput(dataStr);
+      setJsonBackupOpen(true);
     });
   };
 
+  // Import JSON configuration
+  const handleImportJson = () => {
+    try {
+      const parsed = JSON.parse(jsonInput);
+      if (!Array.isArray(parsed) || !parsed.length) {
+        throw new Error('รูปแบบ JSON ไม่ถูกต้อง ต้องเป็น Array ของช่อง');
+      }
+      const validated = parsed.map(c => ({
+        ...c,
+        no: String(c.no).padStart(2, '0'),
+        enabled: c.enabled !== false
+      }));
+      setChannelList(validated);
+      setSelectedNo(validated[0]?.no || '01');
+      setJsonBackupOpen(false);
+      setJsonInput('');
+      showToast(`นำเข้าสำเร็จ ${validated.length} ช่อง`);
+    } catch (err) {
+      showToast(`นำเข้าล้มเหลว: ${err.message}`);
+    }
+  };
+
+  // Save all settings and close
+  const handleSaveAll = () => {
+    let finalChannels = [...channelList];
+
+    // If "Apply API to all" is checked, copy active channel's API URL to all playable channels
+    if (applyToAllApi && activeEditingChannel?.apiUrl) {
+      finalChannels = finalChannels.map(ch => {
+        if (isSettingsChannel(ch)) return ch;
+        return {
+          ...ch,
+          apiUrl: activeEditingChannel.apiUrl,
+          streamUrl: ch.view === 'iframe' ? activeEditingChannel.apiUrl : ch.streamUrl
+        };
+      });
+    }
+
+    onSaveChannels({
+      channels: finalChannels,
+      refreshInterval: parseInt(refreshInterval) || 3
+    });
+    onClose();
+  };
+
   return (
-    <div className="settings-overlay">
-      <div className="settings-card">
+    <div
+      className="settings-overlay"
+      onKeyDown={(e) => {
+        // Prevent Backspace or Delete from bubbling to global window listener and closing the modal
+        if (e.key === 'Backspace' || e.key === 'Delete') {
+          e.stopPropagation();
+        }
+        if (e.key === 'Escape') {
+          e.stopPropagation();
+          onClose();
+        }
+      }}
+    >
+      <div className="settings-card settings-card-wide">
+        {/* Header Bar */}
         <div className="settings-header-row">
-          <div className="settings-title">⚙️ SMW STREAM • TV SYSTEM SETTINGS</div>
-          <button className="settings-close-btn" onClick={onClose}>✕</button>
+          <div className="settings-title">
+            <SettingsIcon size={20} />
+            <span>SMW STREAM • CHANNEL & SYSTEM HUB</span>
+          </div>
+          <button className="settings-close-btn" onClick={onClose} aria-label="ปิดหน้าต่าง">
+            <CloseIcon size={18} />
+          </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="settings-form">
-          {/* Select Target Channel */}
-          <div className="settings-field">
-            <label htmlFor="channel-select">เลือกช่องที่ต้องการตั้งค่า (Channel)</label>
-            <select
-              id="channel-select"
-              className={`settings-input settings-select ${focusIndex === 0 ? 'focused' : ''}`}
-              value={selectedChannelNo}
-              onChange={handleChannelChange}
-            >
-              {playableChannels.map(ch => (
-                <option key={ch.no} value={ch.no}>
-                  CH {ch.no}: {ch.name} ({ch.category})
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* API URL Field */}
-          <div className="settings-field">
-            <div className="label-with-hint">
-              <label htmlFor="api-url-input">API Endpoint URL</label>
-              <small className="field-hint">รองรับ Google Apps Script / REST JSON</small>
-            </div>
-            <div className="input-with-button">
-              <input
-                id="api-url-input"
-                type="text"
-                className={`settings-input ${focusIndex === 1 ? 'focused' : ''}`}
-                value={apiUrl}
-                onChange={(e) => setApiUrl(e.target.value)}
-                placeholder="https://script.google.com/... หรือ REST API"
-                autoComplete="off"
-              />
+        {/* Master-Detail 2-Column Work Area */}
+        <div className="settings-hub-grid">
+          {/* Left Column: Channels Master List */}
+          <aside className="hub-sidebar">
+            <div className="hub-sidebar-header">
+              <span className="hub-col-title">รายการช่อง ({playableChannels.length})</span>
               <button
                 type="button"
-                className="api-test-btn"
-                onClick={handleTestApi}
-                disabled={testStatus?.loading}
+                className="hub-add-btn"
+                onClick={handleAddNewChannel}
+                title="สร้างช่องใหม่"
               >
-                {testStatus?.loading ? 'กำลังทดสอบ...' : '⚡ ทดสอบ API'}
+                <PlusIcon size={15} />
+                <span>เพิ่มช่อง</span>
               </button>
             </div>
-            {testStatus && (
-              <div className={`api-test-badge ${testStatus.success ? 'success' : 'error'}`}>
-                {testStatus.message}
+
+            <div className="hub-channel-scroll">
+              {playableChannels.map((ch, idx) => {
+                const isSelected = activeEditingChannel?.no === ch.no;
+                const isVisible = ch.enabled !== false;
+
+                return (
+                  <div
+                    key={ch.no}
+                    className={`hub-channel-row ${isSelected ? 'selected' : ''} ${!isVisible ? 'disabled-channel' : ''}`}
+                    onClick={() => {
+                      setSelectedNo(ch.no);
+                      setTestStatus(null);
+                      setDeleteConfirmNo(null);
+                    }}
+                  >
+                    <div className="hub-row-main">
+                      <span className="hub-ch-badge">CH {ch.no}</span>
+                      <div className="hub-row-meta">
+                        <strong className="hub-ch-title">{ch.name}</strong>
+                        <small className="hub-ch-category">{ch.category} • {ch.view || 'Dashboard'}</small>
+                      </div>
+                    </div>
+
+                    <div className="hub-row-actions">
+                      <button
+                        type="button"
+                        className={`hub-icon-action ${isVisible ? 'active' : 'muted'}`}
+                        onClick={(e) => handleToggleVisibility(ch.no, e)}
+                        title={isVisible ? 'คลิกเพื่อซ่อนช่องนี้' : 'คลิกเพื่อเปิดแสดงช่องนี้'}
+                      >
+                        {isVisible ? <EyeIcon size={14} /> : <EyeOffIcon size={14} />}
+                      </button>
+
+                      <button
+                        type="button"
+                        className="hub-icon-action"
+                        onClick={(e) => handleCloneChannel(ch, e)}
+                        title="โคลนการตั้งค่าช่องนี้"
+                      >
+                        <CopyIcon size={14} />
+                      </button>
+
+                      <div className="hub-reorder-stack">
+                        <button
+                          type="button"
+                          className="hub-mini-arrow"
+                          disabled={idx === 0}
+                          onClick={(e) => handleMoveChannel(idx, -1, e)}
+                          title="เลื่อนขึ้น"
+                        >
+                          <ChevronUpIcon size={12} />
+                        </button>
+                        <button
+                          type="button"
+                          className="hub-mini-arrow"
+                          disabled={idx === playableChannels.length - 1}
+                          onClick={(e) => handleMoveChannel(idx, 1, e)}
+                          title="เลื่อนลง"
+                        >
+                          <ChevronDownIcon size={12} />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Quick Channel Presets Drawer */}
+            <div className="hub-templates-box">
+              <span className="hub-sub-label">แม่แบบช่องสำเร็จรูป (Presets)</span>
+              <div className="hub-template-chips">
+                {CHANNEL_TEMPLATES.map(tmpl => (
+                  <button
+                    key={tmpl.id}
+                    type="button"
+                    className="hub-template-chip"
+                    onClick={() => handleApplyTemplate(tmpl)}
+                    title={`คลิกเพื่อใส่ข้อมูลแม่แบบ ${tmpl.name} ในช่องปัจจุบัน`}
+                  >
+                    {tmpl.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </aside>
+
+          {/* Right Column: Detailed Channel Editor Form */}
+          <main className="hub-editor">
+            {activeEditingChannel ? (
+              <div className="hub-form-stack">
+                <div className="hub-editor-header">
+                  <div className="hub-editor-channel-chip">
+                    <span className="hub-badge-big">CH {activeEditingChannel.no}</span>
+                    <input
+                      type="text"
+                      className="hub-name-hero-input"
+                      value={activeEditingChannel.name}
+                      onChange={(e) => handleUpdateField('name', e.target.value)}
+                      placeholder="ระบุชื่อช่อง..."
+                      maxLength={80}
+                      required
+                    />
+                  </div>
+
+                  {/* Delete action with safety prompt */}
+                  {deleteConfirmNo === activeEditingChannel.no ? (
+                    <div className="hub-delete-confirm-box">
+                      <span>ลบช่องนี้?</span>
+                      <button
+                        type="button"
+                        className="hub-btn-danger"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleDeleteChannel(activeEditingChannel.no);
+                        }}
+                      >
+                        ยืนยันลบ
+                      </button>
+                      <button
+                        type="button"
+                        className="hub-btn-cancel-mini"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setDeleteConfirmNo(null);
+                        }}
+                      >
+                        ยกเลิก
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      className="hub-btn-delete"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setDeleteConfirmNo(activeEditingChannel.no);
+                      }}
+                      title="ลบช่องนี้ออกจากระบบ"
+                    >
+                      <TrashIcon size={15} />
+                      <span>ลบช่อง</span>
+                    </button>
+                  )}
+                </div>
+
+                {/* Form Fields Grid */}
+                <div className="hub-fields-grid">
+                  <div className="settings-field">
+                    <label>เลขช่อง (Channel Number)</label>
+                    <input
+                      type="text"
+                      className="settings-input"
+                      value={activeEditingChannel.no}
+                      onChange={(e) => handleUpdateField('no', e.target.value.trim())}
+                      maxLength={3}
+                      placeholder="เช่น 11"
+                    />
+                  </div>
+
+                  <div className="settings-field">
+                    <label>หมวดหมู่ (Category)</label>
+                    <select
+                      className="settings-input settings-select"
+                      value={activeEditingChannel.category}
+                      onChange={(e) => handleUpdateField('category', e.target.value)}
+                    >
+                      {CATEGORY_OPTIONS.map(cat => (
+                        <option key={cat} value={cat}>{cat}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="settings-field full-width">
+                    <label>คำอธิบายช่อง (Description)</label>
+                    <input
+                      type="text"
+                      className="settings-input"
+                      value={activeEditingChannel.description}
+                      onChange={(e) => handleUpdateField('description', e.target.value)}
+                      placeholder="สรุปวัตถุประสงค์ สำหรับแสดงผลบนการ์ดและแถบหัวข้อ"
+                      maxLength={160}
+                    />
+                  </div>
+
+                  <div className="settings-field full-width">
+                    <label>ธีมกราฟิกพรีวิว (Thumbnail Graphic)</label>
+                    <select
+                      className="settings-input settings-select"
+                      value={activeEditingChannel.thumbnail || '/graphics/ch01_production.svg'}
+                      onChange={(e) => handleUpdateField('thumbnail', e.target.value)}
+                    >
+                      {THUMBNAIL_OPTIONS.map(th => (
+                        <option key={th.value} value={th.value}>{th.label}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="settings-field full-width">
+                    <label>รูปแบบการแสดงผล (Display Mode)</label>
+                    <select
+                      className="settings-input settings-select"
+                      value={activeEditingChannel.view || 'dashboard'}
+                      onChange={(e) => {
+                        const newView = e.target.value;
+                        handleUpdateField('view', newView);
+                        setTestStatus(null);
+                        if (newView !== 'dashboard' && !activeEditingChannel.streamUrl && activeEditingChannel.apiUrl) {
+                          handleUpdateField('streamUrl', activeEditingChannel.apiUrl);
+                        }
+                      }}
+                    >
+                      <option value="dashboard">📊 TV Dashboard (ตาราง & ตัวชี้วัด KPI ผ่าน JSON API)</option>
+                      <option value="iframe">🌐 Web Iframe (ดึงหน้าเว็บรายงาน / PowerBI / เว็บไซต์มาแสดงผล)</option>
+                      <option value="video">🔒 Video Stream (กล้องวงจรปิด / สตรีมวิดีโอสด HLS / YouTube)</option>
+                    </select>
+                  </div>
+
+                  {/* 1. Mode: Web Iframe */}
+                  {activeEditingChannel.view === 'iframe' && (
+                    <div className="settings-field full-width">
+                      <div className="label-with-hint">
+                        <label>URL หน้าเว็บที่จะเปิดแสดงผล (Web Page / Iframe URL)</label>
+                        <small className="field-hint">ระบบจะเปิดหน้าเว็บนี้แบบเต็มหน้าจอผ่าน Iframe</small>
+                      </div>
+                      <div className="input-with-button">
+                        <input
+                          type="text"
+                          className="settings-input"
+                          value={activeEditingChannel.streamUrl || activeEditingChannel.apiUrl || ''}
+                          onChange={(e) => {
+                            handleUpdateField('streamUrl', e.target.value);
+                            handleUpdateField('apiUrl', e.target.value);
+                          }}
+                          placeholder="https://... ลิงก์รายงาน PowerBI / Looker Studio หรือเว็บไซต์ที่ต้องการแสดง"
+                        />
+                        {(activeEditingChannel.streamUrl || activeEditingChannel.apiUrl) && (
+                          <a
+                            href={activeEditingChannel.streamUrl || activeEditingChannel.apiUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="api-test-btn iframe-test-link"
+                            title="เปิดทดสอบหน้าเว็บในแท็บใหม่"
+                          >
+                            <ExternalLinkIcon size={14} />
+                            <span>ทดสอบเปิดหน้าเว็บ</span>
+                          </a>
+                        )}
+                      </div>
+                      <div className="hub-helper-callout">
+                        <span className="callout-icon">💡</span>
+                        <span>
+                          <strong>สำหรับ Web Iframe:</strong> ไม่จำเป็นต้องเชื่อมต่อ API หรือกดทดสอบ API ระบบจะนำลิงก์ด้านบนไปเปิดใน Iframe บนหน้าจอให้อัตโนมัติ (หากเว็บไซต์ปลายทางมีนโยบายป้องกันการฝัง Iframe ให้คลิกปุ่ม <em>"ทดสอบเปิดหน้าเว็บ"</em> เพื่อตรวจสอบ)
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 2. Mode: Video Stream */}
+                  {activeEditingChannel.view === 'video' && (
+                    <div className="settings-field full-width">
+                      <div className="label-with-hint">
+                        <label>Stream URL (กล้องวงจรปิด / สตรีมวิดีโอสด)</label>
+                        <small className="field-hint">รองรับลิงก์ HLS (.m3u8), MP4 หรือ YouTube URL</small>
+                      </div>
+                      <div className="input-with-button">
+                        <input
+                          type="text"
+                          className="settings-input"
+                          value={activeEditingChannel.streamUrl || ''}
+                          onChange={(e) => handleUpdateField('streamUrl', e.target.value)}
+                          placeholder="https://... หรือ HLS/m3u8 stream / YouTube"
+                        />
+                        {activeEditingChannel.streamUrl && (
+                          <a
+                            href={activeEditingChannel.streamUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="api-test-btn iframe-test-link"
+                            title="เปิดทดสอบสตรีมในแท็บใหม่"
+                          >
+                            <ExternalLinkIcon size={14} />
+                            <span>ทดสอบเปิดสตรีม</span>
+                          </a>
+                        )}
+                      </div>
+                      <div className="hub-helper-callout">
+                        <span className="callout-icon">📹</span>
+                        <span>
+                          <strong>สำหรับ Video Stream:</strong> รองรับสตรีมกล้องวงจรปิด HLS (.m3u8), วิดีโอ MP4 หรือ YouTube ลิงก์ ระบบจะเปิดผ่าน Video Player ประจำช่องโดยตรง
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 3. Mode: TV Dashboard (Standard API + Metrics) */}
+                  {activeEditingChannel.view === 'dashboard' && (
+                    <>
+                      <div className="settings-field">
+                        <label>API Action Parameter</label>
+                        <input
+                          type="text"
+                          className="settings-input"
+                          value={activeEditingChannel.apiAction || 'getTVData'}
+                          onChange={(e) => handleUpdateField('apiAction', e.target.value)}
+                          placeholder="เช่น getTVData"
+                        />
+                      </div>
+
+                      <div className="settings-field full-width">
+                        <div className="label-with-hint">
+                          <label>API Endpoint URL (Google Apps Script / JSON REST)</label>
+                          <small className="field-hint">รองรับคำขอข้อมูลแบบอัตโนมัติ</small>
+                        </div>
+                        <div className="input-with-button">
+                          <input
+                            type="text"
+                            className="settings-input"
+                            value={activeEditingChannel.apiUrl || ''}
+                            onChange={(e) => handleUpdateField('apiUrl', e.target.value)}
+                            placeholder="https://script.google.com/macros/s/.../exec"
+                          />
+                          <button
+                            type="button"
+                            className="api-test-btn"
+                            onClick={handleTestApi}
+                            disabled={testStatus?.loading}
+                          >
+                            <BoltIcon size={15} />
+                            <span>{testStatus?.loading ? 'กำลังทดสอบ...' : 'ทดสอบ API'}</span>
+                          </button>
+                        </div>
+
+                        {/* Test feedback inspector */}
+                        {testStatus && (
+                          <div className={`api-test-badge ${testStatus.success ? 'success' : 'error'}`}>
+                            <div className="test-badge-row">
+                              {testStatus.success ? <CheckIcon size={15} /> : <AlertCircleIcon size={15} />}
+                              <strong>{testStatus.message}</strong>
+                            </div>
+                            {testStatus.previewKeys?.length > 0 && (
+                              <div className="test-payload-keys">
+                                {testStatus.previewKeys.map((k, i) => (
+                                  <span key={i} className="test-key-pill">• {k}</span>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="hub-empty-state">
+                <span>เลือกช่องจากรายการด้านซ้าย หรือคลิก "+ เพิ่มช่อง" เพื่อเริ่มต้น</span>
               </div>
             )}
-          </div>
+          </main>
+        </div>
 
-          {/* View Type Selection */}
-          <div className="settings-field">
-            <label htmlFor="view-type-select">รูปแบบการแสดงผลหน้าจอ (Display Mode)</label>
-            <select
-              id="view-type-select"
-              className={`settings-input settings-select ${focusIndex === 2 ? 'focused' : ''}`}
-              value={viewType}
-              onChange={(e) => setViewType(e.target.value)}
-            >
-              <option value="dashboard">📊 TV Dashboard (ดึงข้อมูล API แสดงผล KPI และตาราง)</option>
-              <option value="iframe">🌐 Iframe Dashboard (โหลดหน้าเว็บสำเร็จรูปจาก URL)</option>
-              <option value="video">🎥 Video Stream (เล่นไฟล์วิดีโอหรือ Live Stream)</option>
-            </select>
-          </div>
-
-          {/* Stream URL (if iframe or video mode) */}
-          {viewType !== 'dashboard' && (
-            <div className="settings-field">
-              <label htmlFor="stream-url-input">Stream / Web Iframe URL</label>
+        {/* Global System Settings & Backup Bar */}
+        <div className="hub-footer-controls">
+          <div className="hub-global-options">
+            <div className="hub-refresh-input-group">
+              <label htmlFor="hub-refresh-input">รอบรีเฟรช:</label>
               <input
-                id="stream-url-input"
-                type="text"
-                className="settings-input"
-                value={streamUrl}
-                onChange={(e) => setStreamUrl(e.target.value)}
-                placeholder="YouTube URL, https://... หรือ video stream URL"
+                id="hub-refresh-input"
+                type="number"
+                min="1"
+                max="60"
+                className="hub-mini-number"
+                value={refreshInterval}
+                onChange={(e) => setRefreshInterval(e.target.value)}
               />
+              <span>นาที</span>
             </div>
-          )}
 
-          {/* Refresh Interval */}
-          <div className="settings-field">
-            <label htmlFor="interval-input">ความถี่ในการรีเฟรชข้อมูลอัตโนมัติ (นาที)</label>
-            <input
-              id="interval-input"
-              type="number"
-              min="1"
-              max="60"
-              className={`settings-input ${focusIndex === 3 ? 'focused' : ''}`}
-              value={refreshInterval}
-              onChange={(e) => setRefreshInterval(e.target.value)}
-            />
-          </div>
-
-          {/* Apply to All Channels Checkbox */}
-          <div className="settings-checkbox-field">
             <label className="checkbox-container">
               <input
                 type="checkbox"
-                checked={applyToAll}
-                onChange={(e) => setApplyToAll(e.target.checked)}
+                checked={applyToAllApi}
+                onChange={(e) => setApplyToAllApi(e.target.checked)}
               />
               <span className="checkbox-label">
-                นำ API URL นี้ไปใช้กับ <strong>ทุกช่อง (CH 01 - CH 10)</strong>
+                นำ API URL ช่องนี้ไปใช้กับ <strong>ทุกช่อง</strong>
               </span>
             </label>
           </div>
 
-          {/* Action Buttons */}
-          <div className="settings-actions">
-            <button
-              type="submit"
-              className={`settings-btn save ${focusIndex === 4 ? 'focused' : ''}`}
-              onClick={handleSubmit}
-            >
-              💾 บันทึกการตั้งค่า
-            </button>
+          <div className="hub-backup-actions">
             <button
               type="button"
-              className={`settings-btn cancel ${focusIndex === 5 ? 'focused' : ''}`}
-              onClick={onClose}
+              className="hub-tool-btn"
+              onClick={handleExportJson}
+              title="คัดลอกการตั้งค่าช่องทั้งหมดเป็น JSON"
             >
-              ยกเลิก
+              <DownloadIcon size={15} />
+              <span>ส่งออก JSON</span>
+            </button>
+
+            <button
+              type="button"
+              className="hub-tool-btn"
+              onClick={() => setJsonBackupOpen(true)}
+              title="วางไฟล์ JSON เพื่อนำเข้าช่องจากเครื่องอื่น"
+            >
+              <UploadIcon size={15} />
+              <span>นำเข้า JSON</span>
             </button>
           </div>
-        </form>
+        </div>
+
+        {/* Bottom Action Buttons */}
+        <div className="settings-actions">
+          <button
+            type="button"
+            className="settings-btn save"
+            onClick={handleSaveAll}
+          >
+            <SaveIcon size={16} />
+            <span>บันทึกการเปลี่ยนแปลงทั้งหมด</span>
+          </button>
+          <button
+            type="button"
+            className="settings-btn cancel"
+            onClick={onClose}
+          >
+            ยกเลิก
+          </button>
+        </div>
+
+        {/* JSON Backup & Import Modal Overlay */}
+        {jsonBackupOpen && (
+          <div className="hub-submodal-overlay" onClick={() => setJsonBackupOpen(false)}>
+            <div className="hub-submodal-card" onClick={(e) => e.stopPropagation()}>
+              <div className="settings-header-row">
+                <span className="settings-title">นำเข้าหรือสำรองข้อมูลการตั้งค่า (JSON)</span>
+                <button className="settings-close-btn" onClick={() => setJsonBackupOpen(false)}>
+                  <CloseIcon size={16} />
+                </button>
+              </div>
+              <p className="submodal-hint">
+                วางโค้ด JSON การตั้งค่าช่องที่คัดลอกมาจาก Smart TV เครื่องอื่น เพื่อโคลนระบบทั้งโรงงาน
+              </p>
+              <textarea
+                className="hub-json-textarea"
+                rows={10}
+                value={jsonInput}
+                onChange={(e) => setJsonInput(e.target.value)}
+                placeholder="วางโค้ด JSON ที่นี่..."
+              />
+              <div className="settings-actions">
+                <button type="button" className="settings-btn save" onClick={handleImportJson}>
+                  <CheckIcon size={16} />
+                  <span>นำเข้าการตั้งค่า</span>
+                </button>
+                <button type="button" className="settings-btn cancel" onClick={() => setJsonBackupOpen(false)}>
+                  ปิด
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Toast Feedback */}
+        {toastMessage && <div className="hub-toast">{toastMessage}</div>}
       </div>
     </div>
   );

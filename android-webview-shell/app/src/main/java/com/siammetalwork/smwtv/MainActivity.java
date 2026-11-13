@@ -16,8 +16,10 @@ public class MainActivity extends Activity {
 
     private WebView myWebView;
     
-    // DEFAULT LOCAL PATH (Loads React TV App embedded inside the APK for instant loading)
+    private static final String REMOTE_URL = "https://smw-tv.vercel.app/";
+    // Offline fallback for devices without a network connection.
     private static final String DEFAULT_URL = "file:///android_asset/index.html";
+    private boolean hasLoadedOfflineFallback;
 
     @Override
     @SuppressLint("SetJavaScriptEnabled")
@@ -48,6 +50,10 @@ public class MainActivity extends Activity {
         // Enable file access for loading local asset index.html
         webSettings.setAllowFileAccess(true);
         webSettings.setAllowContentAccess(true);
+        // Vite emits module scripts and stylesheets as separate local files.
+        // WebView treats file:// pages as an opaque origin unless these are enabled.
+        webSettings.setAllowFileAccessFromFileURLs(true);
+        webSettings.setAllowUniversalAccessFromFileURLs(true);
         
         // Enable viewport support for responsive grids
         webSettings.setUseWideViewPort(true);
@@ -78,10 +84,23 @@ public class MainActivity extends Activity {
                 }
                 return false;
             }
+
+            @Override
+            public void onReceivedError(
+                    WebView view,
+                    android.webkit.WebResourceRequest request,
+                    android.webkit.WebResourceError error
+            ) {
+                if (request.isForMainFrame() && !hasLoadedOfflineFallback) {
+                    hasLoadedOfflineFallback = true;
+                    view.loadUrl(DEFAULT_URL);
+                }
+            }
         });
 
-        // Load the React TV App URL
-        myWebView.loadUrl(DEFAULT_URL);
+        // Load the deployed Vercel production app so backend & channel updates take effect immediately
+        // Automatically falls back to DEFAULT_URL (local asset) if offline or network fails
+        myWebView.loadUrl(REMOTE_URL);
     }
 
     private boolean isYouTubeUrl(String url) {
