@@ -80,6 +80,14 @@ export default function SettingsModal({
     }
   }, [isOpen, channels, currentChannelNo, currentInterval]);
 
+  // Keep selected channel in view when navigating sidebar list
+  useEffect(() => {
+    if (selectedNo) {
+      const activeRow = document.querySelector('.hub-channel-row.selected');
+      activeRow?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }
+  }, [selectedNo]);
+
   if (!isOpen) return null;
 
   const showToast = (msg) => {

@@ -310,13 +310,16 @@ export default function App() {
     return () => clearInterval(shiftInterval);
   }, []);
 
-  // Auto-scroll focused item in sidebar
+  // Auto-scroll focused item in sidebar or content rail when TV remote navigates
   useEffect(() => {
     if (zone === 'sidebar') {
       const activeEl = document.getElementById(`stream-item-${sidebarIndex}`);
       activeEl?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    } else if (zone === 'content') {
+      const activeEl = document.querySelector('.rail-card.focused, .tv-card.focused, .tv-table-row.focused');
+      activeEl?.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' });
     }
-  }, [sidebarIndex, zone]);
+  }, [sidebarIndex, contentIndex, zone]);
 
   // Handle Save Settings from Settings Modal
   const handleSaveChannels = ({ channels: updatedChannels, refreshInterval: newInterval }) => {

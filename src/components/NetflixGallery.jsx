@@ -177,6 +177,32 @@ export default function NetflixGallery({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [focusedRow, focusedCol, rows, selectedHeroChannel, infoModalChannel, channels, onSelectChannel]);
 
+  // Auto-scroll vertically and horizontally when TV remote navigates
+  useEffect(() => {
+    if (focusedRow === 0) {
+      const container = document.getElementById('netflix-gallery-container');
+      if (container) {
+        container.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+      return;
+    }
+
+    const rowIdx = focusedRow - 1;
+    const cardEl = document.getElementById(`netflix-card-${rowIdx}-${focusedCol}`);
+    if (cardEl) {
+      cardEl.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+    } else {
+      const rowEl = document.getElementById(`netflix-row-${rowIdx}`);
+      rowEl?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    // Update hero billboard preview to match focused channel on remote
+    const currentRow = rows[rowIdx];
+    if (currentRow && currentRow.channels[focusedCol]) {
+      setSelectedHeroChannel(currentRow.channels[focusedCol]);
+    }
+  }, [focusedRow, focusedCol, rows]);
+
   // Technical Infographic Graphic resolver for each relevant channel domain
   const getThumbnail = (channel) => {
     if (!channel) return '/graphics/ch01_production.svg';
@@ -364,7 +390,7 @@ export default function NetflixGallery({
       {/* ── Catalog Rows (Netflix Rails) ── */}
       <div className="netflix-rows-section">
         {rows.map((row, rIdx) => (
-          <div key={row.id} className="netflix-row-container">
+          <div key={row.id} id={`netflix-row-${rIdx}`} className="netflix-row-container">
             <div className="row-header">
               <h2 className="row-title">{row.title}</h2>
               {row.subtitle && <span className="row-subtitle">{row.subtitle}</span>}
@@ -379,6 +405,7 @@ export default function NetflixGallery({
                 return (
                   <div
                     key={ch.key}
+                    id={`netflix-card-${rIdx}-${cIdx}`}
                     className={`netflix-card ${isSelected ? 'active-channel' : ''} ${isCardFocused ? 'focused' : ''}`}
                     onMouseEnter={() => setSelectedHeroChannel(ch)}
                     onClick={() => {
