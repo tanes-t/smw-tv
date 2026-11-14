@@ -36,3 +36,4 @@ export interface AppConfig {
   updatedAt: string; // ISO
   channels: Channel[];
 }
+
