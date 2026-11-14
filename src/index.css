@@ -219,14 +219,25 @@ button {
 }
 
 .stream-item.focused {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.2);
-  transform: scale(1.02);
+  background: rgba(229, 9, 20, 0.12);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent), 0 0 16px rgba(229, 9, 20, 0.25);
+  transform: scale(1.04);
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
 }
 
 .stream-item.active {
   background: var(--accent-soft);
-  border-color: rgba(229, 9, 20, 0.4);
+  border-color: rgba(229, 9, 20, 0.6);
+  box-shadow: 0 0 12px rgba(229, 9, 20, 0.3);
+}
+
+.stream-item.focused.active {
+  background: rgba(229, 9, 20, 0.22);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent), 0 0 24px rgba(229, 9, 20, 0.4);
+  transform: scale(1.05);
 }
 
 .stream-number {
@@ -246,6 +257,12 @@ button {
   background: var(--accent);
   color: #fff;
   box-shadow: 0 0 20px var(--accent-glow);
+}
+
+.stream-item.focused .stream-number {
+  background: rgba(229, 9, 20, 0.3);
+  color: #fff;
+  border: 1px solid var(--accent);
 }
 
 .settings-channel-icon {

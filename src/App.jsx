@@ -414,7 +414,7 @@ export default function App() {
               <span className="stream-number"><HomeIcon size={20} /></span>
               <span className="stream-copy">
                 <strong>หน้าแรก (แกลอรี่)</strong>
-                <small>Netflix Catalog Mode</small>
+                <small>แกลอรี่ช่อง SMW</small>
               </span>
             </button>
 
@@ -461,7 +461,7 @@ export default function App() {
                 <button
                   className="top-bar-btn gallery-btn"
                   onClick={() => setViewMode('gallery')}
-                  title="กลับสู่หน้าแกลอรี่ (Netflix Catalog)"
+                  title="กลับสู่หน้าแกลอรี่"
                 >
                   <span className="btn-icon"><ArrowLeftIcon size={16} /></span>
                   <span>หน้าแรก (แกลอรี่)</span>
