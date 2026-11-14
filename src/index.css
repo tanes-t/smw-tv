@@ -5,32 +5,45 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Sarabun:wght@400;500;600;700;800&display=swap');
 
 :root {
-  /* ── Netflix-inspired Color Palette ── */
-  --bg-main: #0a0a0a;
-  --bg-panel: rgba(20, 20, 20, 0.96);
-  --bg-card: #181818;
-  --bg-soft: rgba(255, 255, 255, 0.06);
-  --bg-hover: rgba(255, 255, 255, 0.11);
-  --border: rgba(255, 255, 255, 0.08);
-  --border-light: rgba(255, 255, 255, 0.14);
+  /* ── Impeccable 50-20-20-10 Color Architecture ── */
+  /* [20% Black] Deep Architectural Frame */
+  --bg-main: #0b0d12;
+  --bg-panel: rgba(14, 18, 26, 0.96);
+  --bg-dark-card: #151922;
 
-  /* ── Accent: Netflix Red ── */
+  /* [50% White] Luminous Clean Card Surfaces & Typography */
+  --bg-card: #ffffff;
+  --bg-card-sub: #f8fafc;
+  --bg-soft: rgba(255, 255, 255, 0.08);
+  --bg-hover: rgba(255, 255, 255, 0.14);
+  --text-dark: #0f172a;
+  --text-dark-secondary: #334155;
+  --text-dark-muted: #64748b;
+  --card-border: #e2e8f0;
+
+  /* [20% Red] Signature SMW Vibrant Red */
   --accent: #E50914;
-  --accent-hover: #B80710;
+  --accent-hover: #c40812;
   --accent-glow: rgba(229, 9, 20, 0.35);
-  --accent-soft: rgba(229, 9, 20, 0.15);
+  --accent-soft: rgba(229, 9, 20, 0.12);
+  --accent-border: rgba(229, 9, 20, 0.6);
 
-  /* ── Text ── */
-  --text: #FFFFFF;
-  --text-secondary: #B3B3B3;
-  --text-muted: #808080;
-  --text-dim: #555555;
-
-  /* ── Status Colors ── */
+  /* [10% Other] Semantic Operational Telemetry */
   --red: #E50914;
-  --amber: #f5a623;
-  --blue: #38bdf8;
-  --green: #46d369;
+  --green: #10b981;
+  --green-soft: rgba(16, 185, 129, 0.15);
+  --blue: #06b6d4;
+  --blue-soft: rgba(6, 182, 212, 0.15);
+  --amber: #f59e0b;
+  --amber-soft: rgba(245, 158, 11, 0.15);
+
+  /* Structure & Text on Dark Surfaces */
+  --text: #FFFFFF;
+  --text-secondary: #e2e8f0;
+  --text-muted: #94a3b8;
+  --text-dim: #64748b;
+  --border: rgba(255, 255, 255, 0.1);
+  --border-light: rgba(255, 255, 255, 0.18);
 
   /* ── Typography ── */
   --font-tv: "Outfit", "Sarabun", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -200,9 +213,9 @@ button {
 
 .stream-item {
   align-items: center;
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
   color: var(--text);
   display: grid;
   gap: 0.7rem;
@@ -215,29 +228,48 @@ button {
 }
 
 .stream-item:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.25);
 }
 
 .stream-item.focused {
-  background: rgba(229, 9, 20, 0.12);
+  background: #ffffff; /* [50% White Focused] */
   border-color: var(--accent);
-  box-shadow: 0 0 0 1px var(--accent), 0 0 16px rgba(229, 9, 20, 0.25);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), 0 0 16px rgba(229, 9, 20, 0.3);
   transform: scale(1.04);
-  outline: 2px solid var(--accent);
-  outline-offset: -2px;
+  outline: 3px solid var(--accent);
+  outline-offset: -1px;
+}
+
+.stream-item.focused .stream-copy strong {
+  color: #0f172a;
+}
+
+.stream-item.focused .stream-copy small {
+  color: #475569;
 }
 
 .stream-item.active {
-  background: var(--accent-soft);
-  border-color: rgba(229, 9, 20, 0.6);
-  box-shadow: 0 0 12px rgba(229, 9, 20, 0.3);
+  background: rgba(229, 9, 20, 0.16);
+  border-color: var(--accent);
+  border-left: 5px solid var(--accent); /* [20% Red Left Accent] */
+  box-shadow: 0 0 16px rgba(229, 9, 20, 0.25);
 }
 
 .stream-item.focused.active {
-  background: rgba(229, 9, 20, 0.22);
+  background: #ffffff;
   border-color: var(--accent);
-  box-shadow: 0 0 0 2px var(--accent), 0 0 24px rgba(229, 9, 20, 0.4);
+  border-left: 6px solid var(--accent);
+  outline: 3px solid var(--accent);
   transform: scale(1.05);
+}
+
+.stream-item.focused.active .stream-copy strong {
+  color: #0f172a;
+}
+
+.stream-item.focused.active .stream-copy small {
+  color: #475569;
 }
 
 .stream-number {
@@ -557,10 +589,10 @@ button {
 }
 
 .rail-card {
-  background: var(--bg-card);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: #ffffff; /* [50% White Card] */
+  border: 1px solid #cbd5e1;
   border-radius: 8px;
-  color: var(--text);
+  color: #0f172a;
   cursor: pointer;
   display: flex;
   flex-direction: column;
@@ -571,22 +603,45 @@ button {
   padding: 1rem;
   position: relative;
   text-align: left;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
   transition: transform var(--transition-base), box-shadow var(--transition-base), border-color var(--transition-fast), background var(--transition-fast);
+}
+
+.rail-card span {
+  color: var(--accent); /* [20% Red Category] */
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.rail-card strong {
+  color: #0f172a;
+  font-size: 0.98rem;
+  font-weight: 800;
+}
+
+.rail-card small {
+  color: #64748b;
+  font-size: 0.76rem;
+  font-weight: 600;
 }
 
 .rail-card:hover,
 .rail-card.focused {
-  background: #222222;
-  border-color: rgba(255, 255, 255, 0.35);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.75), 0 0 0 2px rgba(229, 9, 20, 0.5);
+  background: #ffffff;
+  border-color: var(--accent);
+  outline: 3px solid var(--accent);
+  outline-offset: 1px;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5), 0 0 20px var(--accent-glow);
   transform: scale(1.06) translateY(-4px);
   z-index: 10;
 }
 
 .rail-card.active {
-  background: rgba(229, 9, 20, 0.14);
-  border-color: rgba(229, 9, 20, 0.55);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(229, 9, 20, 0.4);
+  background: #ffffff;
+  border: 2px solid var(--accent);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 12px var(--accent-glow);
 }
 
 .rail-card span {
@@ -1303,7 +1358,7 @@ button {
   font-weight: 700;
 }
 
-/* ── Metric Cards Grid ── */
+/* ── Metric Cards Grid (50% White, 20% Red, 20% Black) ── */
 .dashboard-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -1311,17 +1366,18 @@ button {
 }
 
 .tv-card {
-  background: #181818;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 6px;
+  background: #ffffff; /* [50% White Card] */
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
   padding: 1.1rem 1.2rem;
   display: flex;
   flex-direction: column;
   gap: 0.3rem;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
   transition: transform var(--transition-base), border-color var(--transition-fast), box-shadow var(--transition-base);
   position: relative;
   overflow: hidden;
+  color: #0f172a;
 }
 
 .tv-card::before {
@@ -1330,56 +1386,53 @@ button {
   top: 0;
   left: 0;
   right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, var(--accent), transparent);
-  opacity: 0;
-  transition: opacity var(--transition-fast);
+  height: 4px;
+  background: var(--accent); /* [20% Red Top Accent] */
+  opacity: 1;
 }
 
 .tv-card:hover,
 .tv-card.focused {
-  border-color: rgba(255, 255, 255, 0.15);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+  border-color: var(--accent);
+  outline: 3px solid var(--accent);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4), 0 0 16px var(--accent-glow);
   transform: scale(1.03) translateY(-2px);
 }
 
-.tv-card:hover::before,
-.tv-card.focused::before {
-  opacity: 1;
-}
-
 .card-label {
-  font-size: 0.76rem;
-  font-weight: 700;
+  font-size: 0.78rem;
+  font-weight: 800;
   letter-spacing: 0.06em;
-  color: var(--text-muted);
+  color: #64748b;
   text-transform: uppercase;
 }
 
 .card-value {
-  font-size: 2.2rem;
+  font-size: 2.3rem;
   font-weight: 900;
   line-height: 1.1;
   font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
   letter-spacing: -0.02em;
+  color: #0f172a; /* Ultra crisp dark slate */
 }
 
 .card-subtext {
   font-size: 0.78rem;
-  color: var(--text-dim);
+  color: #475569;
   margin-top: 0.15rem;
-  font-weight: 600;
+  font-weight: 700;
 }
 
-/* ── Data Table ── */
+/* ── Data Table (Crisp White High-Contrast) ── */
 .tv-table-wrap {
-  background: #181818;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 6px;
+  background: #ffffff; /* [50% White Table Canvas] */
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+  color: #0f172a;
 }
 
 .tv-table-title {
@@ -1387,20 +1440,20 @@ button {
   justify-content: space-between;
   align-items: center;
   padding: 0.85rem 1.25rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  background: rgba(255, 255, 255, 0.02);
+  border-bottom: 1px solid #e2e8f0;
+  background: #f8fafc;
   font-weight: 800;
-  font-size: 0.92rem;
-  color: #f1f5f9;
+  font-size: 0.95rem;
+  color: #0f172a;
 }
 
 .table-channel-badge {
-  background: var(--accent-soft);
-  border: 1px solid rgba(229, 9, 20, 0.35);
-  color: var(--accent);
-  padding: 0.18rem 0.6rem;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: var(--accent); /* [20% Red Badge] */
+  padding: 0.2rem 0.65rem;
   border-radius: 4px;
-  font-size: 0.68rem;
+  font-size: 0.72rem;
   font-weight: 900;
   letter-spacing: 0.05em;
 }
@@ -1415,23 +1468,24 @@ button {
   border-collapse: collapse;
   text-align: left;
   font-size: 0.86rem;
+  color: #0f172a;
 }
 
 .tv-table th {
-  background: rgba(0, 0, 0, 0.4);
+  background: #f1f5f9;
   padding: 0.75rem 1.2rem;
-  color: var(--text-muted);
-  font-weight: 700;
-  font-size: 0.72rem;
+  color: #475569;
+  font-weight: 800;
+  font-size: 0.74rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  border-bottom: 1px solid #e2e8f0;
 }
 
 .tv-table td {
-  padding: 0.8rem 1.2rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-  color: #e2e8f0;
+  padding: 0.75rem 1.2rem;
+  border-bottom: 1px solid #f1f5f9;
+  color: #1e293b;
   font-weight: 600;
 }
 
@@ -1688,24 +1742,29 @@ button {
 }
 
 .nav-link-btn {
-  background: none;
-  border: none;
-  color: #e5e5e5;
-  cursor: pointer;
-  font-size: 0.9rem;
-  font-weight: 500;
-  padding: 0.25rem 0.5rem;
-  transition: color var(--transition-fast);
-}
-
-.nav-link-btn:hover,
-.nav-link-btn.active {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 20px;
   color: #ffffff;
+  cursor: pointer;
+  font-size: 0.85rem;
   font-weight: 700;
+  padding: 0.35rem 0.85rem;
+  transition: all var(--transition-fast);
+}
+
+.nav-link-btn:hover {
+  background: #ffffff; /* [50% White] */
+  color: #0f172a;
+  border-color: #ffffff;
 }
 
 .nav-link-btn.active {
-  border-bottom: 2px solid var(--accent);
+  background: var(--accent); /* [20% Red Active] */
+  border-color: var(--accent);
+  color: #ffffff;
+  font-weight: 800;
+  box-shadow: 0 0 12px var(--accent-glow);
 }
 
 .netflix-nav-right {
@@ -1995,17 +2054,28 @@ button {
 }
 
 .row-title {
-  color: #e5e5e5;
-  font-size: 1.35rem;
-  font-weight: 800;
+  color: #ffffff; /* [50% Luminous White] */
+  font-size: 1.4rem;
+  font-weight: 900;
   letter-spacing: -0.01em;
-  transition: color var(--transition-fast);
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.row-title::before {
+  content: "";
+  display: inline-block;
+  width: 4px;
+  height: 1.15em;
+  background: var(--accent); /* [20% Red Leading Stripe] */
+  border-radius: 2px;
 }
 
 .row-subtitle {
-  color: #808080;
-  font-size: 0.85rem;
-  font-weight: 500;
+  color: #cbd5e1; /* Crisp Slate Light */
+  font-size: 0.88rem;
+  font-weight: 600;
 }
 
 .netflix-slider {
@@ -2016,10 +2086,11 @@ button {
   scroll-behavior: smooth;
 }
 
-/* ── Netflix Card Architecture ── */
+/* ── Netflix Card Architecture (50% White, 20% Red, 20% Black, 10% Other) ── */
 .netflix-card {
-  background: var(--bg-card);
-  border-radius: 6px;
+  background: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
   cursor: pointer;
   display: flex;
   flex: 0 0 270px;
@@ -2027,21 +2098,23 @@ button {
   height: 250px;
   overflow: hidden;
   position: relative;
-  transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94),
-    box-shadow 0.35s ease,
-    border-color 0.2s ease;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45);
+  transition: transform 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    box-shadow 0.25s ease,
+    outline 0.2s ease;
   width: 270px;
 }
 
 .netflix-card.active-channel {
-  border: 1px solid var(--accent);
+  border: 2px solid var(--accent);
 }
 
 .netflix-card:hover,
 .netflix-card.focused {
-  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.9), 0 0 20px var(--accent-glow);
-  outline: 2px solid var(--accent);
-  transform: scale(1.12);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.75), 0 0 24px var(--accent-glow);
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+  transform: scale(1.08);
   z-index: 40;
 }
 
@@ -2049,7 +2122,7 @@ button {
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
-  height: 145px;
+  height: 140px;
   position: relative;
   width: 100%;
 }
@@ -2064,49 +2137,53 @@ button {
 }
 
 .card-ch-pill {
-  background: rgba(0, 0, 0, 0.75);
-  border-radius: 3px;
+  background: var(--accent); /* [20% Red] */
+  border-radius: 4px;
   color: #ffffff;
-  font-size: 0.72rem;
-  font-weight: 800;
-  padding: 0.15rem 0.45rem;
+  font-size: 0.75rem;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  padding: 0.18rem 0.55rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
 }
 
 .card-live-dot {
-  background: var(--accent);
+  background: #10b981; /* [10% Semantic Green] */
   border-radius: 50%;
-  box-shadow: 0 0 8px var(--accent);
+  box-shadow: 0 0 8px #10b981;
   height: 8px;
   width: 8px;
 }
 
 .card-gradient-overlay {
-  background: linear-gradient(180deg, transparent 40%, #181818 100%);
+  background: linear-gradient(180deg, transparent 40%, rgba(255, 255, 255, 0.9) 100%);
   inset: 0;
   position: absolute;
 }
 
+/* [50% White] Luminous Card Body */
 .card-details {
-  background: #181818;
+  background: #ffffff;
   display: flex;
   flex: 1;
   flex-direction: column;
-  gap: 0.4rem;
+  gap: 0.35rem;
   padding: 0.85rem;
+  color: var(--text-dark);
 }
 
 .card-controls-row {
   align-items: center;
   display: flex;
-  gap: 0.6rem;
+  gap: 0.55rem;
 }
 
 .card-circle-btn {
   align-items: center;
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
   border-radius: 50%;
-  color: #ffffff;
+  color: #334155;
   cursor: pointer;
   display: flex;
   font-size: 0.75rem;
@@ -2118,28 +2195,28 @@ button {
 }
 
 .card-circle-btn.play-circle-btn {
-  background: #ffffff;
-  border-color: #ffffff;
-  color: #000000;
+  background: var(--accent); /* [20% Red] */
+  border-color: var(--accent);
+  color: #ffffff;
 }
 
 .card-circle-btn:hover {
-  background: var(--accent);
-  border-color: var(--accent);
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
   color: #ffffff;
   transform: scale(1.1);
 }
 
 .card-match-text {
-  color: #46d369;
+  color: #10b981; /* [10% Semantic Green] */
   font-size: 0.75rem;
   font-weight: 800;
   margin-left: auto;
 }
 
 .card-title {
-  color: #ffffff;
-  font-size: 0.95rem;
+  color: #0f172a; /* [50% Crisp Deep Dark on White] */
+  font-size: 1.05rem;
   font-weight: 800;
   line-height: 1.25;
   overflow: hidden;
@@ -2154,26 +2231,30 @@ button {
 }
 
 .card-tag {
-  background: rgba(255, 255, 255, 0.08);
-  border-radius: 2px;
-  color: #aaaaaa;
-  font-size: 0.68rem;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  color: #475569;
+  font-size: 0.7rem;
   font-weight: 700;
-  padding: 0.1rem 0.35rem;
+  padding: 0.12rem 0.45rem;
 }
 
 .card-tag.hd-tag {
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  color: #ffffff;
+  background: #ecfeff;
+  border-color: #a5f3fc;
+  color: #0891b2; /* [10% Cyan] */
 }
 
 .card-tag.live-tag {
-  background: rgba(229, 9, 20, 0.2);
-  color: var(--accent);
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #dc2626; /* [20% Red] */
+  font-weight: 800;
 }
 
 .card-desc-snippet {
-  color: #888888;
+  color: #475569;
   display: -webkit-box;
   font-size: 0.75rem;
   line-height: 1.35;
@@ -2182,11 +2263,10 @@ button {
   -webkit-line-clamp: 2;
 }
 
-/* ── Netflix More Info Dialog Modal ── */
+/* ── Netflix More Info Dialog Modal (50% White, 20% Red, 20% Black) ── */
 .netflix-modal-backdrop {
   align-items: center;
-  background-color: rgba(0, 0, 0, 0.85);
-  backdrop-filter: blur(8px);
+  background-color: rgba(11, 13, 18, 0.88);
   display: flex;
   inset: 0;
   justify-content: center;
@@ -2196,9 +2276,10 @@ button {
 }
 
 .netflix-modal-content {
-  background: #181818;
-  border-radius: 8px;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.95);
+  background: #ffffff; /* [50% White Modal Body] */
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.75);
   display: flex;
   flex-direction: column;
   max-height: 90vh;
@@ -2206,14 +2287,15 @@ button {
   overflow-y: auto;
   position: relative;
   width: 100%;
+  color: #0f172a;
 }
 
 .modal-close-btn {
   align-items: center;
-  background: #181818;
-  border: none;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
   border-radius: 50%;
-  color: #ffffff;
+  color: #0f172a;
   cursor: pointer;
   display: flex;
   font-size: 1.1rem;
@@ -2222,13 +2304,16 @@ button {
   position: absolute;
   right: 1.25rem;
   top: 1.25rem;
-  transition: background var(--transition-fast);
+  transition: background var(--transition-fast), border-color var(--transition-fast);
   width: 36px;
   z-index: 10;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .modal-close-btn:hover {
-  background: #333333;
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #ffffff;
 }
 
 .modal-hero {
@@ -2244,7 +2329,7 @@ button {
 }
 
 .modal-hero-vignette {
-  background: linear-gradient(180deg, transparent 40%, #181818 100%);
+  background: linear-gradient(180deg, transparent 40%, rgba(255, 255, 255, 0.95) 100%);
   inset: 0;
   position: absolute;
 }
@@ -2258,21 +2343,21 @@ button {
 }
 
 .modal-badge {
-  background: var(--accent);
-  border-radius: 3px;
+  background: var(--accent); /* [20% Red Badge] */
+  border-radius: 4px;
   color: #ffffff;
   display: inline-block;
   font-size: 0.75rem;
-  font-weight: 800;
-  padding: 0.2rem 0.5rem;
+  font-weight: 900;
+  padding: 0.2rem 0.55rem;
   width: fit-content;
 }
 
 .modal-title {
-  color: #ffffff;
+  color: #0f172a; /* Ultra crisp dark title on white */
   font-size: 2.2rem;
   font-weight: 900;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+  text-shadow: 0 1px 4px rgba(255, 255, 255, 0.8);
 }
 
 .modal-body-content {
@@ -2280,6 +2365,7 @@ button {
   gap: 2rem;
   grid-template-columns: 2fr 1fr;
   padding: 2.5rem;
+  background: #ffffff;
 }
 
 .modal-meta-specs {
@@ -2290,24 +2376,25 @@ button {
 }
 
 .modal-description {
-  color: #dddddd;
+  color: #334155;
   font-size: 1rem;
   line-height: 1.6;
   margin-bottom: 1.5rem;
+  font-weight: 500;
 }
 
 .modal-tech-specs {
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  color: #aaaaaa;
+  border-top: 1px solid #e2e8f0;
+  color: #64748b;
   display: flex;
   flex-direction: column;
-  font-size: 0.85rem;
+  font-size: 0.88rem;
   gap: 0.4rem;
   padding-top: 1.25rem;
 }
 
 .modal-tech-specs strong {
-  color: #ffffff;
+  color: #0f172a;
 }
 
 .modal-body-right {
@@ -2317,15 +2404,17 @@ button {
 }
 
 .about-label {
-  color: #777777;
+  color: #64748b;
   font-size: 0.8rem;
-  font-weight: 700;
+  font-weight: 800;
+  text-transform: uppercase;
   margin-top: 0.5rem;
 }
 
 .about-value {
-  color: #ffffff;
-  font-size: 0.9rem;
+  color: #0f172a;
+  font-size: 0.95rem;
+  font-weight: 600;
 }
 
 .text-green {
