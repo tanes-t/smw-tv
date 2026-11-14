@@ -40,3 +40,4 @@ android-webview-shell/app/src/main/assets/assets/
 .cursor/
 .gemini/
 0.26.0
+*.dll

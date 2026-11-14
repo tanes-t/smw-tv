@@ -13,6 +13,7 @@ import {
   ArrowLeftSmallIcon
 } from './components/Icons';
 import ChannelDashboard from './components/ChannelDashboard';
+import LiveStageContainer from './components/LiveStageContainer';
 import NetflixGallery from './components/NetflixGallery';
 import IntroMotion from './components/IntroMotion';
 import {
@@ -514,46 +515,20 @@ export default function App() {
               </div>
             </header>
 
-            <section className={`player-shell ${zone === 'content' && contentIndex === 0 ? 'focused' : ''}`}>
-              {effectiveViewType === 'iframe' && streamUrl ? (
-                <>
-                  <iframe
-                    src={playerUrl}
-                    title={getChannelName(activeChannel)}
-                    allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
-                    referrerPolicy="strict-origin-when-cross-origin"
-                    className="stream-frame"
-                  />
-                  {isYouTubeStream && (
-                    <a
-                      className="player-external-link"
-                      href={streamUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      เปิดใน YouTube
-                    </a>
-                  )}
-                </>
-              ) : effectiveViewType === 'video' && streamUrl ? (
-                <video className="stream-frame" src={streamUrl} controls autoPlay muted playsInline />
-              ) : (
-                <ChannelDashboard
-                  channel={activeChannel}
-                  data={currentChannelData}
-                  apiUrl={apiUrl}
-                  isLoading={loading}
-                  error={error}
-                  focusIndex={contentIndex}
-                  focusZone={zone}
-                />
-              )}
-
-              <div className="player-overlay">
-                <span>{activeChannel.category}</span>
-                <strong>{getChannelName(activeChannel)}</strong>
-              </div>
-            </section>
+            <LiveStageContainer
+              activeChannel={activeChannel}
+              streamUrl={streamUrl}
+              playerUrl={playerUrl}
+              effectiveViewType={effectiveViewType}
+              isYouTubeStream={isYouTubeStream}
+              currentChannelData={currentChannelData}
+              apiUrl={apiUrl}
+              loading={loading}
+              error={error}
+              contentIndex={contentIndex}
+              zone={zone}
+              getChannelName={getChannelName}
+            />
 
             <section className={`content-rail ${!isControlsVisible ? 'hidden' : ''}`}>
               {playableChannels.slice(0, 5).map((channel, idx) => (
