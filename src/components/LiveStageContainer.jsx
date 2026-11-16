@@ -35,10 +35,25 @@ export default function LiveStageContainer({
     };
   }, [activeChannel?.no]);
 
+  // Focus Guard (Claude Architecture): Refocus window if cross-origin iframe attempts to steal D-pad focus
+  useEffect(() => {
+    const handleRefocus = () => {
+      if (document.activeElement?.tagName === 'IFRAME') {
+        window.focus();
+      }
+    };
+    window.addEventListener('blur', handleRefocus);
+    window.addEventListener('focus', handleRefocus);
+    return () => {
+      window.removeEventListener('blur', handleRefocus);
+      window.removeEventListener('focus', handleRefocus);
+    };
+  }, []);
+
   return (
     <section className={`player-shell ${zone === 'content' && contentIndex === 0 ? 'focused' : ''}`}>
       {effectiveViewType === 'iframe' && streamUrl ? (
-        <div className="stream-frame-wrapper" key={`iframe-wrap-${activeChannel?.no}`}>
+        <div className="stream-frame-wrapper" key={`iframe-wrap-${activeChannel?.no}`} style={{ position: 'relative', width: '100%', height: '100%' }}>
           <iframe
             ref={iframeRef}
             key={`iframe-${activeChannel?.no}`}
@@ -47,7 +62,18 @@ export default function LiveStageContainer({
             allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
             referrerPolicy="strict-origin-when-cross-origin"
             className="stream-frame"
+            tabIndex={-1}
             loading="eager"
+          />
+          {/* Key Shield (Claude Architecture): Prevents cross-origin iframe from capturing remote keyboard events */}
+          <div
+            className="key-shield"
+            style={{
+              position: 'absolute',
+              inset: 0,
+              pointerEvents: 'none',
+              zIndex: 2
+            }}
           />
           {isYouTubeStream && (
             <a
