@@ -7,9 +7,8 @@ import { defineConfig, globalIgnores } from 'eslint/config'
 export default defineConfig([
   globalIgnores([
     'dist',
-    'android-webview-shell/.gradle',
-    'android-webview-shell/**/build',
-    'android-webview-shell/app/src/main/assets/assets',
+    '.agent/**',
+    'android-webview-shell/**',
   ]),
   {
     files: ['**/*.{js,jsx}'],

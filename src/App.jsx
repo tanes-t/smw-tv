@@ -12,7 +12,6 @@ import {
   ArrowRightIcon,
   ArrowLeftSmallIcon
 } from './components/Icons';
-import ChannelDashboard from './components/ChannelDashboard';
 import LiveStageContainer from './components/LiveStageContainer';
 import NetflixGallery from './components/NetflixGallery';
 import IntroMotion from './components/IntroMotion';
@@ -223,7 +222,6 @@ export default function App() {
     zone,
     sidebarIndex,
     contentIndex,
-    settingsIndex,
     setZone,
     setSidebarIndex
   } = useTVNavigation({
@@ -535,7 +533,7 @@ export default function App() {
                 <button
                   key={channel.key}
                   className={`rail-card ${zone === 'content' && contentIndex === idx + 1 ? 'focused' : ''} ${activeChannel.key === channel.key ? 'active' : ''}`}
-                  onClick={() => selectChannel(TV_CHANNELS.findIndex((item) => item.key === channel.key))}
+                  onClick={() => selectChannel(channels.findIndex((item) => item.key === channel.key))}
                 >
                   <span>{channel.category}</span>
                   <strong>{getChannelName(channel)}</strong>
