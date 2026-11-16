@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import '../index.css';
 import {
   isSettingsChannel,
@@ -18,13 +18,25 @@ import {
   CopyIcon,
   EyeIcon,
   EyeOffIcon,
-  RotateCcwIcon,
+
   DownloadIcon,
   UploadIcon,
   ChevronUpIcon,
   ChevronDownIcon,
   ExternalLinkIcon
 } from './Icons';
+
+// ── Module-level helpers (called from handlers only, never in render) ──
+const nowMs = () => Date.now();
+const perfNow = () => performance.now();
+
+let _nextId = 1;
+/** Stamp each channel with a stable _id for editing identity */
+const stampId = (ch) => ({ ...ch, _id: ch._id || `_ch_${_nextId++}` });
+
+/** Strip internal _id before saving/exporting */
+// eslint-disable-next-line no-unused-vars
+const stripIds = (list) => list.map(({ _id: _discarded, ...rest }) => rest);
 
 const THUMBNAIL_OPTIONS = [
   { label: '🏭 ฝ่ายผลิต (Production)', value: '/graphics/ch01_production.svg' },
@@ -50,6 +62,9 @@ const CATEGORY_OPTIONS = [
   'Maintenance'
 ];
 
+// ═══════════════════════════════════════════════════════════
+// Shell: renders overlay only when isOpen. Unmounts form entirely on close.
+// ═══════════════════════════════════════════════════════════
 export default function SettingsModal({
   isOpen,
   onClose,
@@ -58,75 +73,123 @@ export default function SettingsModal({
   currentChannelNo = '01',
   currentInterval = 3
 }) {
-  const [channelList, setChannelList] = useState([]);
-  const [selectedNo, setSelectedNo] = useState(currentChannelNo);
-  const [refreshInterval, setRefreshInterval] = useState(currentInterval);
+  if (!isOpen) return null;
+
+  return (
+    <SettingsForm
+      // key forces full remount each time modal opens → fresh state from props
+      key={`settings-${nowMs()}`}
+      onClose={onClose}
+      channels={channels}
+      onSaveChannels={onSaveChannels}
+      currentChannelNo={currentChannelNo}
+      currentInterval={currentInterval}
+    />
+  );
+}
+
+// ═══════════════════════════════════════════════════════════
+// Form: initialized once from props via lazy initializers.
+//       No useEffect sync → no unwanted resets while editing.
+// ═══════════════════════════════════════════════════════════
+function SettingsForm({
+  onClose,
+  channels,
+  onSaveChannels,
+  currentChannelNo,
+  currentInterval
+}) {
+  // ── State with lazy initializers (run once on mount) ──
+  const [channelList, setChannelList] = useState(() =>
+    JSON.parse(JSON.stringify(channels)).map(stampId)
+  );
+  const [selectedId, setSelectedId] = useState(() => {
+    const stamped = JSON.parse(JSON.stringify(channels)).map(stampId);
+    const match = stamped.find(ch => ch.no === currentChannelNo);
+    return match?._id || stamped.find(ch => !isSettingsChannel(ch))?._id || null;
+  });
+  const [refreshInterval, setRefreshInterval] = useState(() => currentInterval || 3);
   const [testStatus, setTestStatus] = useState(null);
-  const [deleteConfirmNo, setDeleteConfirmNo] = useState(null);
+  const [deleteConfirmId, setDeleteConfirmId] = useState(null);
   const [jsonBackupOpen, setJsonBackupOpen] = useState(false);
   const [jsonInput, setJsonInput] = useState('');
   const [toastMessage, setToastMessage] = useState('');
   const [applyToAllApi, setApplyToAllApi] = useState(false);
 
-  // Synchronize working state whenever modal opens or channels prop updates
-  useEffect(() => {
-    if (isOpen) {
-      const copy = JSON.parse(JSON.stringify(channels));
-      setChannelList(copy);
-      setSelectedNo(currentChannelNo || (copy[0]?.no || '01'));
-      setRefreshInterval(currentInterval || 3);
-      setTestStatus(null);
-      setDeleteConfirmNo(null);
-      setJsonBackupOpen(false);
-    }
-  }, [isOpen, channels, currentChannelNo, currentInterval]);
+  // ── Refs for cleanup ──
+  const toastTimerRef = useRef(null);
+  const abortRef = useRef(null);
 
-  // Keep selected channel in view when navigating sidebar list
+  // Cleanup toast timer + abort controller on unmount
   useEffect(() => {
-    if (selectedNo) {
+    return () => {
+      if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+      if (abortRef.current) abortRef.current.abort();
+    };
+  }, []);
+
+  // ── Keep selected channel in view (instant scroll for TV) ──
+  useEffect(() => {
+    if (selectedId) {
       const activeRow = document.querySelector('.hub-channel-row.selected');
-      activeRow?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      activeRow?.scrollIntoView({ block: 'nearest', behavior: 'instant' });
     }
-  }, [selectedNo]);
+  }, [selectedId]);
 
-  if (!isOpen) return null;
-
-  const showToast = (msg) => {
-    setToastMessage(msg);
-    setTimeout(() => setToastMessage(''), 2600);
-  };
-
+  // ── Derived data ──
   const playableChannels = channelList.filter(ch => !isSettingsChannel(ch));
-  const activeEditingChannel = channelList.find(ch => ch.no === selectedNo) || playableChannels[0] || null;
+  const activeEditingChannel = channelList.find(ch => ch._id === selectedId)
+    || playableChannels[0]
+    || null;
 
-  // Handle single field change in active channel
-  const handleUpdateField = (field, value) => {
+  // ── Toast with proper cleanup ──
+  const showToast = useCallback((msg) => {
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    setToastMessage(msg);
+    toastTimerRef.current = setTimeout(() => setToastMessage(''), 2600);
+  }, []);
+
+  // ── Update multiple fields at once on the active channel ──
+  const handleUpdateFields = useCallback((updates) => {
     if (!activeEditingChannel) return;
     setChannelList(prev => prev.map(ch => {
-      if (ch.no !== activeEditingChannel.no) return ch;
-      const updated = { ...ch, [field]: value };
-      if (field === 'apiUrl' && !ch.streamUrl && ch.view === 'iframe') {
-        updated.streamUrl = value;
-      }
-      return updated;
+      if (ch._id !== activeEditingChannel._id) return ch;
+      return { ...ch, ...updates };
     }));
-  };
+  }, [activeEditingChannel]);
 
-  // Toggle channel visibility (enabled/disabled)
-  const handleToggleVisibility = (no, e) => {
+  // Handle single field change (convenience wrapper)
+  const handleUpdateField = useCallback((field, value) => {
+    if (!activeEditingChannel) return;
+    const updates = { [field]: value };
+    // Auto-sync streamUrl when setting apiUrl on iframe mode
+    if (field === 'apiUrl' && !activeEditingChannel.streamUrl && activeEditingChannel.view === 'iframe') {
+      updates.streamUrl = value;
+    }
+    handleUpdateFields(updates);
+  }, [activeEditingChannel, handleUpdateFields]);
+
+  // Toggle channel visibility
+  const handleToggleVisibility = useCallback((_id, e) => {
     if (e) e.stopPropagation();
+    let nextEnabled;
     setChannelList(prev => prev.map(ch => {
-      if (ch.no === no) {
-        const nextEnabled = ch.enabled === false;
-        showToast(`ช่อง CH ${no} ${nextEnabled ? 'เปิดใช้งาน' : 'ซ่อนการแสดงผล'}`);
+      if (ch._id === _id) {
+        nextEnabled = ch.enabled === false;
         return { ...ch, enabled: nextEnabled };
       }
       return ch;
     }));
-  };
+    // showToast outside state updater
+    const ch = channelList.find(c => c._id === _id);
+    if (ch) {
+      const willEnable = ch.enabled === false;
+      showToast(`ช่อง CH ${ch.no} ${willEnable ? 'เปิดใช้งาน' : 'ซ่อนการแสดงผล'}`);
+    }
+  }, [channelList, showToast]);
 
   // Move channel up / down in order
-  const handleMoveChannel = (index, direction, e) => {
+  const handleMoveChannel = useCallback((index, direction, e) => {
     if (e) e.stopPropagation();
     const newIdx = index + direction;
     if (newIdx < 0 || newIdx >= playableChannels.length) return;
@@ -138,14 +201,14 @@ export default function SettingsModal({
 
     const settingsCh = channelList.find(ch => isSettingsChannel(ch));
     setChannelList(settingsCh ? [...playables, settingsCh] : playables);
-  };
+  }, [playableChannels, channelList]);
 
   // Add a new channel
-  const handleAddNewChannel = () => {
+  const handleAddNewChannel = useCallback(() => {
     const nextNo = getNextChannelNumber(channelList);
-    const newChannel = {
+    const newChannel = stampId({
       no: nextNo,
-      key: `channel-${nextNo}-${Date.now()}`,
+      key: `channel-${nextNo}-${nowMs()}`,
       name: `Line ${nextNo} Live`,
       category: 'Factory',
       description: 'มอนิเตอร์กระบวนการทำงานและตัวชี้วัดประสิทธิภาพแบบเรียลไทม์',
@@ -158,7 +221,7 @@ export default function SettingsModal({
       hasData: true,
       enabled: true,
       isCustom: true
-    };
+    });
 
     const settingsCh = channelList.find(ch => isSettingsChannel(ch));
     const nextList = settingsCh
@@ -166,26 +229,27 @@ export default function SettingsModal({
       : [...playableChannels, newChannel];
 
     setChannelList(nextList);
-    setSelectedNo(nextNo);
+    setSelectedId(newChannel._id);
     setTestStatus(null);
     showToast(`เพิ่มช่องใหม่ CH ${nextNo} เรียบร้อยแล้ว`);
-  };
+  }, [channelList, playableChannels, showToast]);
 
   // Clone active channel
-  const handleCloneChannel = (sourceChannel, e) => {
+  const handleCloneChannel = useCallback((sourceChannel, e) => {
     if (e) e.stopPropagation();
     const source = sourceChannel || activeEditingChannel;
     if (!source) return;
 
     const nextNo = getNextChannelNumber(channelList);
-    const cloned = {
+    const cloned = stampId({
       ...source,
+      _id: undefined, // will be re-stamped
       no: nextNo,
-      key: `channel-${nextNo}-${Date.now()}`,
+      key: `channel-${nextNo}-${nowMs()}`,
       name: `${source.name} (Copy)`,
       enabled: true,
       isCustom: true
-    };
+    });
 
     const settingsCh = channelList.find(ch => isSettingsChannel(ch));
     const nextList = settingsCh
@@ -193,52 +257,49 @@ export default function SettingsModal({
       : [...playableChannels, cloned];
 
     setChannelList(nextList);
-    setSelectedNo(nextNo);
+    setSelectedId(cloned._id);
     showToast(`โคลนช่องเป็น CH ${nextNo} เรียบร้อยแล้ว`);
-  };
+  }, [activeEditingChannel, channelList, playableChannels, showToast]);
 
   // Apply a template preset to active channel
-  const handleApplyTemplate = (template) => {
+  const handleApplyTemplate = useCallback((template) => {
     if (!activeEditingChannel) return;
-    setChannelList(prev => prev.map(ch => {
-      if (ch.no !== activeEditingChannel.no) return ch;
-      return {
-        ...ch,
-        category: template.category,
-        description: template.description,
-        view: template.view,
-        streamType: template.view,
-        apiUrl: template.apiUrl ?? (template.view === 'dashboard' ? ch.apiUrl : ''),
-        apiAction: template.apiAction ?? (template.view === 'dashboard' ? ch.apiAction : 'getTVData'),
-        streamUrl: template.streamUrl ?? (template.view !== 'dashboard' ? ch.streamUrl : ''),
-        thumbnail: template.thumbnail || ch.thumbnail
-      };
-    }));
+    handleUpdateFields({
+      category: template.category,
+      description: template.description,
+      view: template.view,
+      streamType: template.view,
+      apiUrl: template.apiUrl ?? (template.view === 'dashboard' ? activeEditingChannel.apiUrl : ''),
+      apiAction: template.apiAction ?? (template.view === 'dashboard' ? activeEditingChannel.apiAction : 'getTVData'),
+      streamUrl: template.streamUrl ?? (template.view !== 'dashboard' ? activeEditingChannel.streamUrl : ''),
+      thumbnail: template.thumbnail || activeEditingChannel.thumbnail
+    });
     setTestStatus(null);
     showToast(`นำแม่แบบ ${template.name} มาปรับใช้แล้ว`);
-  };
+  }, [activeEditingChannel, handleUpdateFields, showToast]);
 
   // Delete channel safely with confirmation
-  const handleDeleteChannel = (no) => {
+  const handleDeleteChannel = useCallback((_id) => {
     if (playableChannels.length <= 1) {
       showToast('ไม่สามารถลบช่องได้ ต้องมีช่องอย่างน้อย 1 ช่องในระบบ');
-      setDeleteConfirmNo(null);
+      setDeleteConfirmId(null);
       return;
     }
 
-    const updated = channelList.filter(ch => ch.no !== no);
+    const deletedCh = channelList.find(ch => ch._id === _id);
+    const updated = channelList.filter(ch => ch._id !== _id);
     setChannelList(updated);
-    setDeleteConfirmNo(null);
+    setDeleteConfirmId(null);
 
-    if (selectedNo === no) {
+    if (selectedId === _id) {
       const remainingPlayables = updated.filter(ch => !isSettingsChannel(ch));
-      setSelectedNo(remainingPlayables[0]?.no || '01');
+      setSelectedId(remainingPlayables[0]?._id || null);
     }
-    showToast(`ลบช่อง CH ${no} แล้ว`);
-  };
+    showToast(`ลบช่อง CH ${deletedCh?.no || '??'} แล้ว`);
+  }, [channelList, playableChannels, selectedId, showToast]);
 
-  // Test API endpoint live
-  const handleTestApi = async () => {
+  // Test API endpoint with AbortController + 10s timeout
+  const handleTestApi = useCallback(async () => {
     if (!activeEditingChannel?.apiUrl) {
       setTestStatus({
         loading: false,
@@ -249,15 +310,24 @@ export default function SettingsModal({
       return;
     }
 
+    // Abort any previous in-flight test
+    if (abortRef.current) abortRef.current.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+
     setTestStatus({ loading: true, success: false, message: 'กำลังทดสอบเชื่อมต่อไปยัง API...', previewKeys: [] });
-    const startTime = performance.now();
+    const startTime = perfNow();
+
+    // 10-second timeout
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
 
     try {
       const action = activeEditingChannel.apiAction || 'getTVData';
       const sep = activeEditingChannel.apiUrl.includes('?') ? '&' : '?';
       const testUrl = `${activeEditingChannel.apiUrl}${sep}action=${action}&channel=${activeEditingChannel.no}`;
-      const response = await fetch(testUrl);
-      const elapsed = Math.round(performance.now() - startTime);
+      const response = await fetch(testUrl, { signal: controller.signal });
+      clearTimeout(timeoutId);
+      const elapsed = Math.round(perfNow() - startTime);
 
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const json = await response.json();
@@ -285,6 +355,16 @@ export default function SettingsModal({
         previewKeys: detected
       });
     } catch (err) {
+      clearTimeout(timeoutId);
+      if (err.name === 'AbortError') {
+        setTestStatus({
+          loading: false,
+          success: false,
+          message: 'หมดเวลา: API ไม่ตอบกลับภายใน 10 วินาที',
+          previewKeys: []
+        });
+        return;
+      }
       let friendlyMsg = `เชื่อมต่อไม่สำเร็จ: ${err.message}`;
       if (err.message && err.message.includes('Failed to fetch')) {
         friendlyMsg = 'เชื่อมต่อไม่สำเร็จ (Failed to fetch): โดเมนปลายทางไม่ได้เปิด CORS หรือ URL นี้เป็นหน้าเว็บ HTML ทั่วไปไม่ใช่ REST API JSON (หากต้องการเปิดหน้าเว็บ ให้เลือกรูปแบบเป็น "Web Iframe" และกรอกในช่อง URL หน้าเว็บแทน)';
@@ -296,44 +376,58 @@ export default function SettingsModal({
         previewKeys: []
       });
     }
-  };
+  }, [activeEditingChannel]);
 
   // Export JSON configuration to clipboard
-  const handleExportJson = () => {
-    const dataStr = JSON.stringify(channelList, null, 2);
+  const handleExportJson = useCallback(() => {
+    const dataStr = JSON.stringify(stripIds(channelList), null, 2);
     navigator.clipboard.writeText(dataStr).then(() => {
       showToast('คัดลอกไฟล์ JSON ไปยังคลิปบอร์ดแล้ว');
     }).catch(() => {
       setJsonInput(dataStr);
       setJsonBackupOpen(true);
     });
-  };
+  }, [channelList, showToast]);
 
   // Import JSON configuration
-  const handleImportJson = () => {
+  const handleImportJson = useCallback(() => {
     try {
       const parsed = JSON.parse(jsonInput);
       if (!Array.isArray(parsed) || !parsed.length) {
         throw new Error('รูปแบบ JSON ไม่ถูกต้อง ต้องเป็น Array ของช่อง');
       }
-      const validated = parsed.map(c => ({
+      const validated = parsed.map(c => stampId({
         ...c,
         no: String(c.no).padStart(2, '0'),
         enabled: c.enabled !== false
       }));
       setChannelList(validated);
-      setSelectedNo(validated[0]?.no || '01');
+      setSelectedId(validated[0]?._id || null);
       setJsonBackupOpen(false);
       setJsonInput('');
       showToast(`นำเข้าสำเร็จ ${validated.length} ช่อง`);
     } catch (err) {
       showToast(`นำเข้าล้มเหลว: ${err.message}`);
     }
-  };
+  }, [jsonInput, showToast]);
 
-  // Save all settings and close
-  const handleSaveAll = () => {
-    let finalChannels = [...channelList];
+  // Save all settings and close — blocks if channel numbers are empty or duplicated
+  const handleSaveAll = useCallback(() => {
+    // Validate: no empty or duplicate channel numbers
+    const playables = channelList.filter(ch => !isSettingsChannel(ch));
+    const emptyNo = playables.find(ch => !ch.no || !ch.no.trim());
+    if (emptyNo) {
+      showToast(`ช่อง "${emptyNo.name}" ไม่มีเลขช่อง กรุณาระบุเลขช่องก่อนบันทึก`);
+      return;
+    }
+    const nos = playables.map(ch => ch.no.trim());
+    const dupes = nos.filter((n, i) => nos.indexOf(n) !== i);
+    if (dupes.length > 0) {
+      showToast(`เลขช่อง ${[...new Set(dupes)].join(', ')} ซ้ำกัน กรุณาแก้ไขก่อนบันทึก`);
+      return;
+    }
+
+    let finalChannels = stripIds([...channelList]);
 
     // If "Apply API to all" is checked, copy active channel's API URL to all playable channels
     if (applyToAllApi && activeEditingChannel?.apiUrl) {
@@ -352,8 +446,11 @@ export default function SettingsModal({
       refreshInterval: parseInt(refreshInterval) || 3
     });
     onClose();
-  };
+  }, [channelList, applyToAllApi, activeEditingChannel, refreshInterval, onSaveChannels, onClose, showToast]);
 
+  // ═══════════════════════════════════════════════════════════
+  // RENDER
+  // ═══════════════════════════════════════════════════════════
   return (
     <div
       className="settings-overlay"
@@ -399,17 +496,17 @@ export default function SettingsModal({
 
             <div className="hub-channel-scroll">
               {playableChannels.map((ch, idx) => {
-                const isSelected = activeEditingChannel?.no === ch.no;
+                const isSelected = activeEditingChannel?._id === ch._id;
                 const isVisible = ch.enabled !== false;
 
                 return (
                   <div
-                    key={ch.no}
+                    key={ch._id}
                     className={`hub-channel-row ${isSelected ? 'selected' : ''} ${!isVisible ? 'disabled-channel' : ''}`}
                     onClick={() => {
-                      setSelectedNo(ch.no);
+                      setSelectedId(ch._id);
                       setTestStatus(null);
-                      setDeleteConfirmNo(null);
+                      setDeleteConfirmId(null);
                     }}
                   >
                     <div className="hub-row-main">
@@ -424,7 +521,7 @@ export default function SettingsModal({
                       <button
                         type="button"
                         className={`hub-icon-action ${isVisible ? 'active' : 'muted'}`}
-                        onClick={(e) => handleToggleVisibility(ch.no, e)}
+                        onClick={(e) => handleToggleVisibility(ch._id, e)}
                         title={isVisible ? 'คลิกเพื่อซ่อนช่องนี้' : 'คลิกเพื่อเปิดแสดงช่องนี้'}
                       >
                         {isVisible ? <EyeIcon size={14} /> : <EyeOffIcon size={14} />}
@@ -503,7 +600,7 @@ export default function SettingsModal({
                   </div>
 
                   {/* Delete action with safety prompt */}
-                  {deleteConfirmNo === activeEditingChannel.no ? (
+                  {deleteConfirmId === activeEditingChannel._id ? (
                     <div className="hub-delete-confirm-box">
                       <span>ลบช่องนี้?</span>
                       <button
@@ -512,7 +609,7 @@ export default function SettingsModal({
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          handleDeleteChannel(activeEditingChannel.no);
+                          handleDeleteChannel(activeEditingChannel._id);
                         }}
                       >
                         ยืนยันลบ
@@ -523,7 +620,7 @@ export default function SettingsModal({
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          setDeleteConfirmNo(null);
+                          setDeleteConfirmId(null);
                         }}
                       >
                         ยกเลิก
@@ -536,7 +633,7 @@ export default function SettingsModal({
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        setDeleteConfirmNo(activeEditingChannel.no);
+                        setDeleteConfirmId(activeEditingChannel._id);
                       }}
                       title="ลบช่องนี้ออกจากระบบ"
                     >
@@ -605,11 +702,12 @@ export default function SettingsModal({
                       value={activeEditingChannel.view || 'dashboard'}
                       onChange={(e) => {
                         const newView = e.target.value;
-                        handleUpdateField('view', newView);
-                        setTestStatus(null);
+                        const updates = { view: newView, streamType: newView };
                         if (newView !== 'dashboard' && !activeEditingChannel.streamUrl && activeEditingChannel.apiUrl) {
-                          handleUpdateField('streamUrl', activeEditingChannel.apiUrl);
+                          updates.streamUrl = activeEditingChannel.apiUrl;
                         }
+                        handleUpdateFields(updates);
+                        setTestStatus(null);
                       }}
                     >
                       <option value="dashboard">📊 TV Dashboard (ตาราง & ตัวชี้วัด KPI ผ่าน JSON API)</option>
@@ -631,8 +729,10 @@ export default function SettingsModal({
                           className="settings-input"
                           value={activeEditingChannel.streamUrl || activeEditingChannel.apiUrl || ''}
                           onChange={(e) => {
-                            handleUpdateField('streamUrl', e.target.value);
-                            handleUpdateField('apiUrl', e.target.value);
+                            handleUpdateFields({
+                              streamUrl: e.target.value,
+                              apiUrl: e.target.value
+                            });
                           }}
                           placeholder="https://... ลิงก์รายงาน PowerBI / Looker Studio หรือเว็บไซต์ที่ต้องการแสดง"
                         />
@@ -652,7 +752,7 @@ export default function SettingsModal({
                       <div className="hub-helper-callout">
                         <span className="callout-icon">💡</span>
                         <span>
-                          <strong>สำหรับ Web Iframe:</strong> ไม่จำเป็นต้องเชื่อมต่อ API หรือกดทดสอบ API ระบบจะนำลิงก์ด้านบนไปเปิดใน Iframe บนหน้าจอให้อัตโนมัติ (หากเว็บไซต์ปลายทางมีนโยบายป้องกันการฝัง Iframe ให้คลิกปุ่ม <em>"ทดสอบเปิดหน้าเว็บ"</em> เพื่อตรวจสอบ)
+                          <strong>สำหรับ Web Iframe:</strong> ไม่จำเป็นต้องเชื่อมต่อ API หรือกดทดสอบ API ระบบจะนำลิงก์ด้านบนไปเปิดใน Iframe บนหน้าจอให้อัตโนมัติ (หากเว็บไซต์ปลายทางมีนโยบายป้องกันการฝัง Iframe ให้คลิกปุ่ม <em>&quot;ทดสอบเปิดหน้าเว็บ&quot;</em> เพื่อตรวจสอบ)
                         </span>
                       </div>
                     </div>

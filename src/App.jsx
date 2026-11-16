@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, lazy, Suspense } from 'react';
 import { useTVNavigation } from './hooks/useTVNavigation';
-import SettingsModal from './components/SettingsModal';
+const SettingsModal = lazy(() => import('./components/SettingsModal'));
 import SettingsIcon from './components/SettingsIcon';
 import {
   HomeIcon,
@@ -559,14 +559,18 @@ export default function App() {
         </div>
       )}
 
-      <SettingsModal
-        isOpen={isSettingsOpen}
-        onClose={() => setIsSettingsOpen(false)}
-        channels={channels}
-        onSaveChannels={handleSaveChannels}
-        currentChannelNo={activeChannel.no}
-        currentInterval={refreshInterval}
-      />
+      {isSettingsOpen && (
+        <Suspense fallback={null}>
+          <SettingsModal
+            isOpen={isSettingsOpen}
+            onClose={() => setIsSettingsOpen(false)}
+            channels={channels}
+            onSaveChannels={handleSaveChannels}
+            currentChannelNo={activeChannel.no}
+            currentInterval={refreshInterval}
+          />
+        </Suspense>
+      )}
 
       {toastMessage && <div className="tv-toast">{toastMessage}</div>}
 
