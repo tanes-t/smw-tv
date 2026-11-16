@@ -52,15 +52,21 @@ export default function App() {
   });
 
   const [pixelShift, setPixelShift] = useState(0);
+  const [remoteDigitOsd, setRemoteDigitOsd] = useState('');
+  const remoteDigitBufferRef = useRef('');
+  const remoteDigitTimerRef = useRef(null);
+  const remoteOsdTimerRef = useRef(null);
 
   const safeActiveIndex = Math.min(Math.max(0, activeChannelIdx), Math.max(0, channels.length - 1));
-  const activeChannel = channels[safeActiveIndex] || channels[0] || {
-    no: '01',
-    name: 'Standby Channel',
-    category: 'Factory',
-    description: 'ระบบสแตนด์บาย',
-    view: 'dashboard'
-  };
+  const activeChannel = useMemo(() => {
+    return channels[safeActiveIndex] || channels[0] || {
+      no: '01',
+      name: 'Standby Channel',
+      category: 'Factory',
+      description: 'ระบบสแตนด์บาย',
+      view: 'dashboard'
+    };
+  }, [channels, safeActiveIndex]);
 
   const apiUrl = activeChannel.apiUrl || '';
   const streamUrl = activeChannel.streamUrl || apiUrl;
@@ -91,9 +97,9 @@ export default function App() {
   // Activity listeners to show controls and reset auto-hide timeout
   useEffect(() => {
     if (viewMode !== 'live') {
-      setIsControlsVisible(true);
+      const showTimer = setTimeout(() => setIsControlsVisible(true), 0);
       if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
-      return;
+      return () => clearTimeout(showTimer);
     }
 
     const handleUserActivity = () => {
@@ -106,9 +112,10 @@ export default function App() {
     window.addEventListener('wheel', handleUserActivity);
 
     // Initial timeout when entering live mode
-    resetControlsTimeout();
+    const initTimer = setTimeout(resetControlsTimeout, 0);
 
     return () => {
+      clearTimeout(initTimer);
       window.removeEventListener('mousemove', handleUserActivity);
       window.removeEventListener('keydown', handleUserActivity);
       window.removeEventListener('touchstart', handleUserActivity);
@@ -181,18 +188,88 @@ export default function App() {
     showToast(`กำลังเปิด CH ${selectedChannel.no}: ${selectedChannel.name}`);
   }, [channels, showToast, resetControlsTimeout]);
 
-  // Global key listener for Back/Escape to return to Netflix Gallery
+  // Direct tuning by channel number string
+  const tuneToChannelNumber = useCallback((numStr) => {
+    const formatted = String(numStr).padStart(2, '0');
+    const targetIdx = channels.findIndex(c => c.no === formatted || c.no === numStr);
+    if (targetIdx !== -1) {
+      selectChannel(targetIdx);
+    } else {
+      showToast(`ไม่พบช่องหมายเลข CH ${formatted}`);
+    }
+  }, [channels, selectChannel, showToast]);
+
+  // Cycle channel up or down (ChannelUp / ChannelDown buttons on TV remote)
+  const cycleChannel = useCallback((direction) => {
+    if (!playableChannels.length) return;
+    const currentPlayableIdx = playableChannels.findIndex(c => c.no === activeChannel.no);
+    const safeIdx = currentPlayableIdx === -1 ? 0 : currentPlayableIdx;
+    const nextIdx = (safeIdx + direction + playableChannels.length) % playableChannels.length;
+    const targetChannel = playableChannels[nextIdx];
+    if (targetChannel) {
+      const fullIdx = channels.findIndex(c => c.no === targetChannel.no);
+      if (fullIdx !== -1) selectChannel(fullIdx);
+    }
+  }, [playableChannels, activeChannel, channels, selectChannel]);
+
+  // Global key listener for TV Remote (Back, Digits 0-9, CH+/CH-, Settings)
   useEffect(() => {
-    const handleGlobalBack = (e) => {
+    const handleGlobalRemote = (e) => {
       const targetTag = e.target?.tagName;
       const isInput = targetTag === 'INPUT' || targetTag === 'TEXTAREA' || targetTag === 'SELECT' || e.target?.isContentEditable;
 
-      // When typing inside any text input or editable element, NEVER intercept Backspace/Delete as navigation!
-      if ((e.key === 'Backspace' || e.key === 'Delete') && isInput) {
+      // When typing inside any text input or editable element, NEVER intercept keys as remote navigation!
+      if (isInput) {
+        if (e.key === 'Backspace' || e.key === 'Delete') return;
         return;
       }
 
       resetControlsTimeout();
+
+      // Direct Number keys (0-9) on TV Remote for instant channel switching
+      if (!isSettingsOpen && e.key >= '0' && e.key <= '9') {
+        e.preventDefault();
+        if (remoteDigitTimerRef.current) clearTimeout(remoteDigitTimerRef.current);
+        if (remoteOsdTimerRef.current) clearTimeout(remoteOsdTimerRef.current);
+
+        const nextBuffer = (remoteDigitBufferRef.current + e.key).slice(-2);
+        remoteDigitBufferRef.current = nextBuffer;
+        setRemoteDigitOsd(nextBuffer);
+
+        if (nextBuffer.length >= 2) {
+          tuneToChannelNumber(nextBuffer);
+          remoteDigitBufferRef.current = '';
+          remoteOsdTimerRef.current = setTimeout(() => setRemoteDigitOsd(''), 900);
+        } else {
+          remoteDigitTimerRef.current = setTimeout(() => {
+            if (remoteDigitBufferRef.current) {
+              tuneToChannelNumber(remoteDigitBufferRef.current);
+              remoteDigitBufferRef.current = '';
+              remoteOsdTimerRef.current = setTimeout(() => setRemoteDigitOsd(''), 900);
+            }
+          }, 1100);
+        }
+        return;
+      }
+
+      // ChannelUp / ChannelDown / PageUp / PageDown keys on TV Remote
+      if (!isSettingsOpen && (e.key === 'ChannelUp' || e.key === 'PageUp')) {
+        e.preventDefault();
+        cycleChannel(1);
+        return;
+      }
+      if (!isSettingsOpen && (e.key === 'ChannelDown' || e.key === 'PageDown')) {
+        e.preventDefault();
+        cycleChannel(-1);
+        return;
+      }
+
+      // Quick Settings button ('s' / 'S' / 'Settings')
+      if (!isSettingsOpen && (e.key === 's' || e.key === 'S' || e.key === 'Settings')) {
+        e.preventDefault();
+        setIsSettingsOpen(true);
+        return;
+      }
 
       // In Settings modal: ONLY Escape or physical TV remote Back key closes the modal (never Backspace)
       if (isSettingsOpen) {
@@ -204,7 +281,7 @@ export default function App() {
       }
 
       // Outside Settings modal: Escape or Back (or Backspace when not in an input)
-      if (e.key === 'Escape' || e.key === 'Back' || (!isInput && e.key === 'Backspace')) {
+      if (e.key === 'Escape' || e.key === 'Back' || e.key === 'Backspace') {
         if (isChannelMenuOpen) {
           setIsChannelMenuOpen(false);
           e.preventDefault();
@@ -214,9 +291,9 @@ export default function App() {
         }
       }
     };
-    window.addEventListener('keydown', handleGlobalBack);
-    return () => window.removeEventListener('keydown', handleGlobalBack);
-  }, [isSettingsOpen, isChannelMenuOpen, viewMode, resetControlsTimeout]);
+    window.addEventListener('keydown', handleGlobalRemote);
+    return () => window.removeEventListener('keydown', handleGlobalRemote);
+  }, [isSettingsOpen, isChannelMenuOpen, viewMode, resetControlsTimeout, tuneToChannelNumber, cycleChannel]);
 
   const {
     zone,
@@ -225,6 +302,7 @@ export default function App() {
     setZone,
     setSidebarIndex
   } = useTVNavigation({
+    enabled: viewMode === 'live' && !isSettingsOpen,
     sidebarCount: channels.length,
     contentCount: CONTENT_ITEMS,
     onSelectChannel: selectChannel,
@@ -309,14 +387,14 @@ export default function App() {
     return () => clearInterval(shiftInterval);
   }, []);
 
-  // Auto-scroll focused item in sidebar or content rail when TV remote navigates
+  // Auto-scroll focused item in sidebar or content rail when TV remote navigates (instant for TV)
   useEffect(() => {
     if (zone === 'sidebar') {
       const activeEl = document.getElementById(`stream-item-${sidebarIndex}`);
-      activeEl?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      activeEl?.scrollIntoView({ block: 'nearest', behavior: 'instant' });
     } else if (zone === 'content') {
       const activeEl = document.querySelector('.rail-card.focused, .tv-card.focused, .tv-table-row.focused');
-      activeEl?.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' });
+      activeEl?.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'instant' });
     }
   }, [sidebarIndex, contentIndex, zone]);
 
@@ -573,6 +651,13 @@ export default function App() {
       )}
 
       {toastMessage && <div className="tv-toast">{toastMessage}</div>}
+
+      {remoteDigitOsd && (
+        <div className="tv-remote-osd" role="status" aria-live="polite">
+          <div className="tv-remote-osd-badge">CH {remoteDigitOsd.padStart(2, '0')}</div>
+          <div className="tv-remote-osd-hint">กำลังสลับช่อง...</div>
+        </div>
+      )}
 
       <div className={`virtual-remote ${!isControlsVisible ? 'hidden' : ''}`}>
         <span className="remote-title">TV REMOTE</span>

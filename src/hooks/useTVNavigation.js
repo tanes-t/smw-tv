@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 
 export function useTVNavigation(config = {}) {
   const {
+    enabled = true,
     sidebarCount = 20,
     contentCount = 0,
     onSelectChannel = () => {},
@@ -30,6 +31,7 @@ export function useTVNavigation(config = {}) {
   }, [isSettingsOpen, isChannelMenuOpen]);
 
   const handleKeyDown = useCallback((e) => {
+    if (!enabled) return;
     const key = e.key;
 
     if (zone !== 'settings' && (key === 'Menu' || key === 'ContextMenu' || key === 'm' || key === 'M')) {
@@ -112,7 +114,7 @@ export function useTVNavigation(config = {}) {
         }
       }
     }
-  }, [zone, sidebarIndex, sidebarCount, contentCount, onSelectChannel, onOpenChannelMenu, onCloseChannelMenu, isChannelMenuOpen]);
+  }, [enabled, zone, sidebarIndex, sidebarCount, contentCount, onSelectChannel, onOpenChannelMenu, onCloseChannelMenu, isChannelMenuOpen]);
 
   // Handle global key events
   useEffect(() => {

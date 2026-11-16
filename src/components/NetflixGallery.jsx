@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import SettingsIcon from './SettingsIcon';
 import {
   PlayIcon,
@@ -10,7 +10,6 @@ import {
 
 export default function NetflixGallery({
   channels = [],
-  activeChannelIdx = 0,
   onSelectChannel,
   onOpenSettings,
   onReplayIntro,
@@ -177,12 +176,12 @@ export default function NetflixGallery({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [focusedRow, focusedCol, rows, selectedHeroChannel, infoModalChannel, channels, onSelectChannel]);
 
-  // Auto-scroll vertically and horizontally when TV remote navigates
+  // Auto-scroll vertically and horizontally when TV remote navigates (instant for TV)
   useEffect(() => {
     if (focusedRow === 0) {
       const container = document.getElementById('netflix-gallery-container');
       if (container) {
-        container.scrollTo({ top: 0, behavior: 'smooth' });
+        container.scrollTo({ top: 0, behavior: 'instant' });
       }
       return;
     }
@@ -190,16 +189,18 @@ export default function NetflixGallery({
     const rowIdx = focusedRow - 1;
     const cardEl = document.getElementById(`netflix-card-${rowIdx}-${focusedCol}`);
     if (cardEl) {
-      cardEl.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+      cardEl.scrollIntoView({ behavior: 'instant', block: 'center', inline: 'center' });
     } else {
       const rowEl = document.getElementById(`netflix-row-${rowIdx}`);
-      rowEl?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      rowEl?.scrollIntoView({ behavior: 'instant', block: 'center' });
     }
 
     // Update hero billboard preview to match focused channel on remote
     const currentRow = rows[rowIdx];
     if (currentRow && currentRow.channels[focusedCol]) {
-      setSelectedHeroChannel(currentRow.channels[focusedCol]);
+      const targetCh = currentRow.channels[focusedCol];
+      const timer = setTimeout(() => setSelectedHeroChannel(targetCh), 0);
+      return () => clearTimeout(timer);
     }
   }, [focusedRow, focusedCol, rows]);
 
@@ -400,7 +401,6 @@ export default function NetflixGallery({
               {row.channels.map((ch, cIdx) => {
                 const isSelected = heroChannel.no === ch.no;
                 const isCardFocused = focusedRow === rIdx + 1 && focusedCol === cIdx;
-                const liveData = channelDataMap[ch.no];
 
                 return (
                   <div

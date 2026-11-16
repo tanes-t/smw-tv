@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.net.Uri;
@@ -118,13 +119,27 @@ public class MainActivity extends Activity {
     }
 
     @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        if (event.getAction() == KeyEvent.ACTION_DOWN && event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
+            // Forward Back key directly to web app as Escape event for clean React navigation
+            if (myWebView != null) {
+                myWebView.evaluateJavascript(
+                    "window.dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape', bubbles: true, cancelable: true}));",
+                    null
+                );
+                return true;
+            }
+        }
+        return super.dispatchKeyEvent(event);
+    }
+
+    @Override
     public void onBackPressed() {
-        // Prevent accidental exits on back button press (very common with TV remotes)
-        if (myWebView.canGoBack()) {
-            myWebView.goBack();
-        } else {
-            // Un-comment to allow exit, or keep disabled for kiosk display boards
-            // super.onBackPressed();
+        if (myWebView != null) {
+            myWebView.evaluateJavascript(
+                "window.dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape', bubbles: true, cancelable: true}));",
+                null
+            );
         }
     }
 
