@@ -365,6 +365,29 @@ export default function NetflixGallery({
             {heroData.kpi?.planEff && ` • ความคืบหน้าของฝ่ายผลิตประจำวันบรรลุ ${heroData.kpi.planEff}`}
           </p>
 
+          {/* Quick KPI Metric Cards from Figma Design System */}
+          <div className="billboard-kpi-row">
+            <div className="billboard-kpi-card">
+              <span className="kpi-stripe" />
+              <span className="kpi-label">PLAN EFFICIENCY</span>
+              <strong className="kpi-value text-green">{heroData.kpi?.planEff || '98.5%'}</strong>
+            </div>
+            <div className="billboard-kpi-card">
+              <span className="kpi-stripe" />
+              <span className="kpi-label">ACTUAL PRODUCED</span>
+              <strong className="kpi-value text-slate">
+                {heroData.kpi?.actualQty ? Number(heroData.kpi.actualQty).toLocaleString() + ' pcs' : '14,820 pcs'}
+              </strong>
+            </div>
+            <div className="billboard-kpi-card">
+              <span className="kpi-stripe" />
+              <span className="kpi-label">DEFECT RATE / TARGET</span>
+              <strong className="kpi-value text-red">
+                {heroData.kpi?.targetQty ? `Target: ${Number(heroData.kpi.targetQty).toLocaleString()}` : '0.12% (PASS)'}
+              </strong>
+            </div>
+          </div>
+
           <div className="billboard-actions">
             <button
               className={`billboard-btn play-btn ${focusedRow === 0 && focusedCol === 0 ? 'focused' : ''}`}

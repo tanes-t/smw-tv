@@ -2034,6 +2034,67 @@ button {
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
 }
 
+/* Figma-aligned Hero KPI telemetry cards (50% White, 20% Red Accent) */
+.billboard-kpi-row {
+  display: flex;
+  gap: 1.15rem;
+  margin: 1.15rem 0 0.85rem;
+  flex-wrap: wrap;
+}
+
+.billboard-kpi-card {
+  position: relative;
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 0.75rem 1.3rem;
+  min-width: 180px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 2px 6px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.billboard-kpi-card .kpi-stripe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--accent); /* Signature Red Stripe */
+}
+
+.billboard-kpi-card .kpi-label {
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: #64748b;
+  margin-top: 0.2rem;
+  text-transform: uppercase;
+}
+
+.billboard-kpi-card .kpi-value {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.45rem;
+  font-weight: 900;
+  line-height: 1.2;
+  margin-top: 0.25rem;
+  letter-spacing: 0.02em;
+}
+
+.billboard-kpi-card .text-green {
+  color: #10b981;
+}
+
+.billboard-kpi-card .text-slate {
+  color: #0f172a;
+}
+
+.billboard-kpi-card .text-red {
+  color: #e50914;
+}
+
 .billboard-actions {
   display: flex;
   gap: 1rem;
