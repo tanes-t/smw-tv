@@ -471,9 +471,9 @@ export default function App() {
           <aside className="stream-sidebar">
             <button className="brand-button" onClick={() => setIsSettingsOpen(true)}>
               <img
-                src="https://raw.githubusercontent.com/tanes-t/smw-assets/main/smw_logo.png"
-                alt="SMW Logo"
-                className="tv-logo"
+                src="/smw_tv_logo.svg"
+                alt="SMW-TV Logo"
+                className="tv-logo-freshened"
               />
               <span>
                 <strong>SMW-TV</strong>

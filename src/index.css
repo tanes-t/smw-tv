@@ -1769,23 +1769,27 @@ button {
 
 .netflix-brand {
   align-items: center;
+  cursor: pointer;
   display: flex;
-  font-weight: 900;
-  letter-spacing: -1px;
+  transition: transform var(--transition-fast), opacity var(--transition-fast);
 }
 
-.brand-n {
-  color: var(--accent);
-  font-size: 1.85rem;
-  font-weight: 900;
-  text-shadow: 0 0 15px var(--accent-glow);
+.netflix-brand:hover {
+  opacity: 0.9;
+  transform: scale(1.03);
 }
 
-.brand-tv {
-  color: #ffffff;
-  font-size: 1.4rem;
-  font-weight: 800;
-  margin-left: 2px;
+.brand-logo-img {
+  display: block;
+  height: 40px;
+  width: auto;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.6));
+}
+
+.tv-logo-freshened {
+  height: 38px;
+  width: auto;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.5));
 }
 
 .netflix-nav-links {

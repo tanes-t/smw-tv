@@ -247,9 +247,8 @@ export default function NetflixGallery({
       {/* ── Top Navigation Bar ── */}
       <nav className={`netflix-nav ${isHeaderScrolled ? 'scrolled' : ''}`}>
         <div className="netflix-nav-left">
-          <div className="netflix-brand">
-            <span className="brand-n">SMW</span>
-            <span className="brand-tv">TV</span>
+          <div className="netflix-brand" onClick={onReplayIntro} role="button" tabIndex={0} title="SMW-TV Brand Logo">
+            <img src="/smw_tv_logo.svg" alt="SMW-TV" className="brand-logo-img" />
           </div>
 
           <div className="netflix-nav-links">

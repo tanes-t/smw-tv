@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 52" fill="none">
+  <!-- Background Badge Frame: 50-20-20-10 palette -->
+  <rect x="2" y="2" width="156" height="48" rx="8" fill="#0B0D12" stroke="rgba(255, 255, 255, 0.12)" stroke-width="1.5" />
+  <!-- Red Brand Edge Accent -->
+  <rect x="2" y="2" width="5" height="48" rx="2" fill="#E50914" />
+  
+  <!-- Red Shield Icon Emblem -->
+  <rect x="14" y="8" width="36" height="36" rx="8" fill="#E50914" />
+  <path d="M14 8h36v2H14z" fill="#FFFFFF" fill-opacity="0.4" />
+  
+  <!-- SMW monogram on Shield -->
+  <text x="32" y="26" font-family="'Outfit', system-ui, sans-serif" font-size="12" font-weight="900" fill="#FFFFFF" text-anchor="middle" letter-spacing="-0.5">SMW</text>
+  
+  <!-- TV Sub-pill inside Shield -->
+  <rect x="23" y="30" width="18" height="9" rx="2" fill="#FFFFFF" />
+  <text x="32" y="37" font-family="'Outfit', system-ui, sans-serif" font-size="7.5" font-weight="900" fill="#E50914" text-anchor="middle">TV</text>
+
+  <!-- Wordmark "SMW" (50% Pure Luminous White) -->
+  <text x="58" y="33" font-family="'Outfit', system-ui, sans-serif" font-size="22" font-weight="900" fill="#FFFFFF" letter-spacing="-0.5">SMW</text>
+  
+  <!-- "TV" Accent Badge (20% Red) -->
+  <rect x="114" y="16" width="36" height="20" rx="4" fill="#E50914" />
+  <text x="132" y="31" font-family="'Outfit', system-ui, sans-serif" font-size="13" font-weight="900" fill="#FFFFFF" text-anchor="middle" letter-spacing="0.5">TV</text>
+</svg>
