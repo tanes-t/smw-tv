@@ -1743,9 +1743,12 @@ button {
 /* ── Top Navigation Bar ── */
 .netflix-nav {
   align-items: center;
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.4) 60%, transparent 100%);
+  background: rgba(11, 13, 18, 0.94);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
-  height: 70px;
+  height: 68px;
   justify-content: space-between;
   left: 0;
   padding: 0 3.5rem;
@@ -1757,8 +1760,8 @@ button {
 }
 
 .netflix-nav.scrolled {
-  background-color: #141414;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
+  background-color: #0b0d12;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.85);
 }
 
 .netflix-nav-left {
@@ -1927,29 +1930,31 @@ button {
 .netflix-billboard {
   align-items: flex-end;
   display: flex;
-  height: 72vh;
-  min-height: 520px;
-  padding: 0 3.5rem 5rem 3.5rem;
+  height: 70vh;
+  min-height: 500px;
+  margin-top: 68px;
+  padding: 2.5rem 3.5rem 4rem 3.5rem;
   position: relative;
   width: 100%;
 }
 
 .billboard-backdrop {
-  background-position: center 25%;
+  background-position: center center;
   background-repeat: no-repeat;
   background-size: cover;
   inset: 0;
   position: absolute;
+  opacity: 0.28;
 }
 
 .billboard-vignette-bottom {
-  background: linear-gradient(180deg, transparent 40%, rgba(10, 10, 10, 0.6) 70%, #0a0a0a 100%);
+  background: linear-gradient(180deg, transparent 30%, rgba(11, 13, 18, 0.7) 65%, #0b0d12 100%);
   inset: 0;
   position: absolute;
 }
 
 .billboard-vignette-left {
-  background: linear-gradient(90deg, rgba(10, 10, 10, 0.95) 0%, rgba(10, 10, 10, 0.7) 40%, transparent 100%);
+  background: linear-gradient(90deg, rgba(11, 13, 18, 0.98) 0%, rgba(11, 13, 18, 0.82) 45%, transparent 100%);
   inset: 0;
   position: absolute;
 }
@@ -1963,23 +1968,6 @@ button {
   z-index: 10;
 }
 
-.billboard-figma-brand-row {
-  display: flex;
-  margin-bottom: 0.15rem;
-}
-
-.billboard-figma-banner-badge {
-  display: block;
-  height: 48px;
-  width: auto;
-  border-radius: 8px;
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.7);
-  transition: transform var(--transition-fast);
-}
-
-.billboard-figma-banner-badge:hover {
-  transform: scale(1.02);
-}
 
 .billboard-badge-row {
   align-items: center;

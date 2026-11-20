@@ -343,9 +343,6 @@ export default function NetflixGallery({
         </div>
 
         <div className="billboard-meta-content">
-          <div className="billboard-figma-brand-row">
-            <img src="/smw_tv_figma_banner.svg" alt="SMW-TV Industrial Telemetry" className="billboard-figma-banner-badge" />
-          </div>
           <div className="billboard-badge-row">
             <span className="netflix-top10-badge">TOP 1</span>
             <span className="hero-series-badge">SMW LIVE TELEMETRY</span>
