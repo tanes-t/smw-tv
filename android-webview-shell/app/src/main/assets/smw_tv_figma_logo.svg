@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 60" width="240" height="60" fill="none">
+  <!-- Red Rounded Square App Badge with M Monogram -->
+  <rect x="4" y="6" width="48" height="48" rx="12" fill="#E50914"/>
+  <path d="M14 10h28v2H14z" fill="#FFFFFF" fill-opacity="0.35"/>
+  <path d="M16 43V23h5.4l5.1 11.4 5.1-11.4H37v20h-4.5V30.5L28 39.8h-3l-4.5-9.3V43H16z" fill="#FFFFFF"/>
+
+  <!-- "SMW" Wordmark (50% Pure Luminous White) -->
+  <text x="64" y="42" font-family="'Outfit', system-ui, -apple-system, sans-serif" font-size="34" font-weight="900" fill="#FFFFFF" letter-spacing="-0.8">SMW</text>
+
+  <!-- "TV" Red Badge -->
+  <rect x="156" y="16" width="48" height="30" rx="7" fill="#E50914"/>
+  <text x="180" y="38" font-family="'Outfit', system-ui, -apple-system, sans-serif" font-size="19" font-weight="900" fill="#FFFFFF" text-anchor="middle" letter-spacing="0.5">TV</text>
+</svg>

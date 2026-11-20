@@ -437,12 +437,21 @@ export default function App() {
         <NetflixGallery
           channels={channels.filter(c => c.enabled !== false)}
           activeChannelIdx={safeActiveIndex}
-          onSelectChannel={(idx) => {
-            const enabledList = channels.filter(c => c.enabled !== false);
-            const targetChannel = enabledList[idx];
-            if (targetChannel) {
-              const fullIdx = channels.findIndex(c => c.no === targetChannel.no);
-              selectChannel(fullIdx !== -1 ? fullIdx : idx);
+          onSelectChannel={(target) => {
+            if (typeof target === 'number') {
+              const enabledList = channels.filter(c => c.enabled !== false);
+              const targetChannel = enabledList[target] || channels[target];
+              if (targetChannel) {
+                const fullIdx = channels.findIndex(c => c.no === targetChannel.no);
+                selectChannel(fullIdx !== -1 ? fullIdx : target);
+              } else {
+                selectChannel(target);
+              }
+            } else if (target && typeof target === 'object' && target.no) {
+              const fullIdx = channels.findIndex(c => c.no === target.no);
+              if (fullIdx !== -1) {
+                selectChannel(fullIdx);
+              }
             }
           }}
           onOpenSettings={() => setIsSettingsOpen(true)}
@@ -471,7 +480,7 @@ export default function App() {
           <aside className="stream-sidebar">
             <button className="brand-button" onClick={() => setIsSettingsOpen(true)}>
               <img
-                src="/smw_tv_logo.svg"
+                src="/smw_tv_figma_logo.svg"
                 alt="SMW-TV Logo"
                 className="tv-logo-freshened"
               />

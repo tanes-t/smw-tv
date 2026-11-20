@@ -1963,6 +1963,24 @@ button {
   z-index: 10;
 }
 
+.billboard-figma-brand-row {
+  display: flex;
+  margin-bottom: 0.15rem;
+}
+
+.billboard-figma-banner-badge {
+  display: block;
+  height: 48px;
+  width: auto;
+  border-radius: 8px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.7);
+  transition: transform var(--transition-fast);
+}
+
+.billboard-figma-banner-badge:hover {
+  transform: scale(1.02);
+}
+
 .billboard-badge-row {
   align-items: center;
   display: flex;
