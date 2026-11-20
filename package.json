@@ -8,7 +8,10 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "sync:android": "powershell -Command \"Copy-Item -Path 'dist/*' -Destination 'android-webview-shell/app/src/main/assets/' -Recurse -Force\""
+    "sync:android": "powershell -Command \"Copy-Item -Path 'dist/*' -Destination 'android-webview-shell/app/src/main/assets/' -Recurse -Force\"",
+    "build:android": "npm run build && npm run sync:android",
+    "deploy:vercel": "git add -A && git commit -m \"deploy: release update\" && git push origin main",
+    "ship": "npm run build && npm run sync:android && git add -A && git commit -m \"deploy: full release\" && git push origin main"
   },
   "dependencies": {
     "redis": "^5.8.2",

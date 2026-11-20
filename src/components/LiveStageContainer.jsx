@@ -24,16 +24,17 @@ export default function LiveStageContainer({
 }) {
   const iframeRef = useRef(null);
 
-  // WebView RAM Guard: Force flush previous iframe context when switching channels
+  // WebView RAM Guard: Force flush previous iframe context when unmounting
   useEffect(() => {
+    const frame = iframeRef.current;
     return () => {
-      if (iframeRef.current) {
+      if (frame) {
         try {
-          iframeRef.current.src = 'about:blank';
+          frame.src = 'about:blank';
         } catch (_) {}
       }
     };
-  }, [activeChannel?.no]);
+  }, []);
 
   // Focus Guard (Claude Architecture): Refocus window if cross-origin iframe attempts to steal D-pad focus
   useEffect(() => {

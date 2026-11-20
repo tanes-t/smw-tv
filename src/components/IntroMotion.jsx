@@ -19,6 +19,19 @@ export default function IntroMotion({ onComplete }) {
       const AudioCtx = window.AudioContext || window.webkitAudioContext;
       if (!AudioCtx) return;
       const ctx = new AudioCtx();
+      if (ctx.state === 'suspended') {
+        // Do not force resume if there's no user gesture yet to prevent browser warnings
+        const resumeOnInteraction = () => {
+          ctx.resume().catch(() => {});
+          window.removeEventListener('click', resumeOnInteraction);
+          window.removeEventListener('keydown', resumeOnInteraction);
+          window.removeEventListener('touchstart', resumeOnInteraction);
+        };
+        window.addEventListener('click', resumeOnInteraction, { once: true });
+        window.addEventListener('keydown', resumeOnInteraction, { once: true });
+        window.addEventListener('touchstart', resumeOnInteraction, { once: true });
+        return;
+      }
 
       // Ta (Sub Bass Impact)
       const osc1 = ctx.createOscillator();

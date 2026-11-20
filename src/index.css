@@ -1944,7 +1944,7 @@ button {
   background-size: cover;
   inset: 0;
   position: absolute;
-  opacity: 0.28;
+  opacity: 0.55;
 }
 
 .billboard-vignette-bottom {
@@ -1954,7 +1954,7 @@ button {
 }
 
 .billboard-vignette-left {
-  background: linear-gradient(90deg, rgba(11, 13, 18, 0.98) 0%, rgba(11, 13, 18, 0.82) 45%, transparent 100%);
+  background: linear-gradient(90deg, rgba(11, 13, 18, 0.95) 0%, rgba(11, 13, 18, 0.6) 40%, transparent 100%);
   inset: 0;
   position: absolute;
 }

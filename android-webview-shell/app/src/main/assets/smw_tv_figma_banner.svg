@@ -2,28 +2,20 @@
   <!-- Deep Architectural Frame #0B0D12 -->
   <rect width="640" height="320" fill="#0B0D12"/>
 
-  <!-- Subtle Ambient Glow Behind Card -->
-  <circle cx="165" cy="160" r="140" fill="#E50914" fill-opacity="0.12" filter="blur(30px)"/>
+  <!-- Subtle Ambient Glow Behind Text -->
+  <circle cx="320" cy="160" r="180" fill="#E50914" fill-opacity="0.08" filter="blur(30px)"/>
 
-  <!-- Left: Red Rounded App Emblem (Figma Spec) -->
-  <rect x="75" y="80" width="160" height="160" rx="36" fill="#E50914"/>
-  <!-- Top Metallic Precision Highlight -->
-  <path d="M105 80h100v4H105z" fill="#FFFFFF" fill-opacity="0.35"/>
-  <!-- Pure White M Icon inside Emblem -->
-  <path d="M110 195V125h18l17 38 17-38h18v70h-15v-44l-15 34h-10l-15-34v44h-15z" fill="#FFFFFF"/>
-
-  <!-- Right: Typography & Brand Badging -->
   <!-- "SMW" Wordmark -->
-  <text x="275" y="162" font-family="'Outfit', system-ui, -apple-system, sans-serif" font-size="78" font-weight="900" fill="#FFFFFF" letter-spacing="-1.5">SMW</text>
+  <text x="140" y="180" font-family="'Outfit', system-ui, -apple-system, sans-serif" font-size="90" font-weight="900" fill="#FFFFFF" letter-spacing="-2">SMW</text>
 
   <!-- "TV" Red Badge -->
-  <rect x="475" y="104" width="94" height="64" rx="14" fill="#E50914"/>
-  <text x="522" y="151" font-family="'Outfit', system-ui, -apple-system, sans-serif" font-size="40" font-weight="900" fill="#FFFFFF" text-anchor="middle" letter-spacing="1">TV</text>
+  <rect x="420" y="120" width="94" height="64" rx="14" fill="#E50914"/>
+  <text x="467" y="167" font-family="'Outfit', system-ui, -apple-system, sans-serif" font-size="40" font-weight="900" fill="#FFFFFF" text-anchor="middle" letter-spacing="1">TV</text>
 
   <!-- Tagline Subtitle -->
-  <text x="278" y="198" font-family="'Outfit', system-ui, -apple-system, sans-serif" font-size="14.5" font-weight="700" fill="#94A3B8" letter-spacing="2.2">SIAM METALWORK • INDUSTRIAL TELEMETRY</text>
+  <text x="142" y="216" font-family="'Outfit', system-ui, -apple-system, sans-serif" font-size="14.5" font-weight="700" fill="#94A3B8" letter-spacing="2.2">SIAM METALWORK • INDUSTRIAL TELEMETRY</text>
 
   <!-- Live Telemetry Status Pill -->
-  <circle cx="284" cy="223" r="5" fill="#10B981"/>
-  <text x="298" y="227" font-family="'Outfit', system-ui, -apple-system, sans-serif" font-size="13" font-weight="800" fill="#10B981" letter-spacing="1.5">REAL-TIME PRODUCTION STREAM</text>
+  <circle cx="148" cy="241" r="5" fill="#10B981"/>
+  <text x="162" y="245" font-family="'Outfit', system-ui, -apple-system, sans-serif" font-size="13" font-weight="800" fill="#10B981" letter-spacing="1.5">REAL-TIME PRODUCTION STREAM</text>
 </svg>

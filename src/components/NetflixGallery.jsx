@@ -156,17 +156,14 @@ export default function NetflixGallery({
         if (focusedRow === 0) {
           // Hero actions
           if (focusedCol === 0 && selectedHeroChannel) {
-            const idx = channels.findIndex(c => c.no === selectedHeroChannel.no);
-            if (idx !== -1) onSelectChannel(idx);
+            onSelectChannel(selectedHeroChannel);
           } else if (focusedCol === 1 && selectedHeroChannel) {
             setInfoModalChannel(selectedHeroChannel);
           }
         } else {
           const currentRow = rows[focusedRow - 1];
           if (currentRow && currentRow.channels[focusedCol]) {
-            const targetChannel = currentRow.channels[focusedCol];
-            const idx = channels.findIndex(c => c.no === targetChannel.no);
-            if (idx !== -1) onSelectChannel(idx);
+            onSelectChannel(currentRow.channels[focusedCol]);
           }
         }
       }
@@ -366,10 +363,7 @@ export default function NetflixGallery({
           <div className="billboard-actions">
             <button
               className={`billboard-btn play-btn ${focusedRow === 0 && focusedCol === 0 ? 'focused' : ''}`}
-              onClick={() => {
-                const idx = channels.findIndex(c => c.no === heroChannel.no);
-                if (idx !== -1) onSelectChannel(idx);
-              }}
+              onClick={() => onSelectChannel(heroChannel)}
             >
               <span className="btn-icon"><PlayIcon size={18} /></span>
               <span>ดูการถ่ายทอดสด (Watch Live)</span>
@@ -406,10 +400,7 @@ export default function NetflixGallery({
                     id={`netflix-card-${rIdx}-${cIdx}`}
                     className={`netflix-card ${isSelected ? 'active-channel' : ''} ${isCardFocused ? 'focused' : ''}`}
                     onMouseEnter={() => setSelectedHeroChannel(ch)}
-                    onClick={() => {
-                      const idx = channels.findIndex(c => c.no === ch.no);
-                      if (idx !== -1) onSelectChannel(idx);
-                    }}
+                    onClick={() => onSelectChannel(ch)}
                   >
                     <div
                       className="card-image"
@@ -486,11 +477,8 @@ export default function NetflixGallery({
                   <button
                     className="billboard-btn play-btn"
                     onClick={() => {
-                      const idx = channels.findIndex(c => c.no === infoModalChannel.no);
-                      if (idx !== -1) {
-                        setInfoModalChannel(null);
-                        onSelectChannel(idx);
-                      }
+                      setInfoModalChannel(null);
+                      onSelectChannel(infoModalChannel);
                     }}
                   >
                     <span className="btn-icon"><PlayIcon size={18} /></span>

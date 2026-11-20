@@ -438,20 +438,16 @@ export default function App() {
           channels={channels.filter(c => c.enabled !== false)}
           activeChannelIdx={safeActiveIndex}
           onSelectChannel={(target) => {
-            if (typeof target === 'number') {
+            let ch = null;
+            if (target && typeof target === 'object' && target.no) {
+              ch = target;
+            } else if (typeof target === 'number') {
               const enabledList = channels.filter(c => c.enabled !== false);
-              const targetChannel = enabledList[target] || channels[target];
-              if (targetChannel) {
-                const fullIdx = channels.findIndex(c => c.no === targetChannel.no);
-                selectChannel(fullIdx !== -1 ? fullIdx : target);
-              } else {
-                selectChannel(target);
-              }
-            } else if (target && typeof target === 'object' && target.no) {
-              const fullIdx = channels.findIndex(c => c.no === target.no);
-              if (fullIdx !== -1) {
-                selectChannel(fullIdx);
-              }
+              ch = enabledList[target] || channels[target];
+            }
+            if (ch && ch.no) {
+              const fullIdx = channels.findIndex(c => c.no === ch.no);
+              if (fullIdx !== -1) selectChannel(fullIdx);
             }
           }}
           onOpenSettings={() => setIsSettingsOpen(true)}
@@ -478,17 +474,6 @@ export default function App() {
           )}
 
           <aside className="stream-sidebar">
-            <button className="brand-button" onClick={() => setIsSettingsOpen(true)}>
-              <img
-                src="/smw_tv_figma_logo.svg"
-                alt="SMW-TV Logo"
-                className="tv-logo-freshened"
-              />
-              <span>
-                <strong>SMW-TV</strong>
-                <small>Smart Manufacturing • Live</small>
-              </span>
-            </button>
 
             <button
               className="stream-item stream-home-btn"
