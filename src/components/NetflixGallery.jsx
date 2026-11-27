@@ -291,19 +291,19 @@ export default function NetflixGallery({
               className={`nav-link-btn ${activeCategoryFilter === 'FACTORY' ? 'active' : ''} ${focusedRow === -1 && focusedCol === 1 ? 'focused' : ''}`}
               onClick={() => setActiveCategoryFilter('FACTORY')}
             >
-              โรงงาน & สายการผลิต
+              โรงงาน &amp; สายการผลิต
             </button>
             <button
               className={`nav-link-btn ${activeCategoryFilter === 'LOGISTICS' ? 'active' : ''} ${focusedRow === -1 && focusedCol === 2 ? 'focused' : ''}`}
               onClick={() => setActiveCategoryFilter('LOGISTICS')}
             >
-              คลังสินค้า & ขนส่ง
+              คลังสินค้า &amp; ขนส่ง
             </button>
             <button
               className={`nav-link-btn ${activeCategoryFilter === 'CCTV' ? 'active' : ''} ${focusedRow === -1 && focusedCol === 3 ? 'focused' : ''}`}
               onClick={() => setActiveCategoryFilter('CCTV')}
             >
-              กล้อง & ความปลอดภัย
+              กล้อง &amp; ความปลอดภัย
             </button>
           </div>
         </div>
