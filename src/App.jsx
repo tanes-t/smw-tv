@@ -84,25 +84,32 @@ export default function App() {
   const getChannelName = useCallback((channel) => channel?.name || '', []);
 
   // Reset auto-hide timer for controls during live playback
+  const viewModeRef = useRef(viewMode);
+  viewModeRef.current = viewMode;
+  const isChannelMenuOpenRef = useRef(isChannelMenuOpen);
+  isChannelMenuOpenRef.current = isChannelMenuOpen;
+  const isSettingsOpenRef = useRef(isSettingsOpen);
+  isSettingsOpenRef.current = isSettingsOpen;
+
   const resetControlsTimeout = useCallback(() => {
     setIsControlsVisible(true);
     if (controlsTimeoutRef.current) {
       clearTimeout(controlsTimeoutRef.current);
     }
     // Only auto-hide in 'live' mode when menus/settings are closed
-    if (viewMode === 'live' && !isChannelMenuOpen && !isSettingsOpen) {
+    if (viewModeRef.current === 'live' && !isChannelMenuOpenRef.current && !isSettingsOpenRef.current) {
       controlsTimeoutRef.current = setTimeout(() => {
         setIsControlsVisible(false);
-      }, 3500);
+      }, 3000);
     }
-  }, [viewMode, isChannelMenuOpen, isSettingsOpen]);
+  }, []);
 
   // Activity listeners to show controls and reset auto-hide timeout
   useEffect(() => {
     if (viewMode !== 'live') {
-      const showTimer = setTimeout(() => setIsControlsVisible(true), 0);
+      setIsControlsVisible(true);
       if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
-      return () => clearTimeout(showTimer);
+      return;
     }
 
     const handleUserActivity = () => {
@@ -115,10 +122,9 @@ export default function App() {
     window.addEventListener('wheel', handleUserActivity);
 
     // Initial timeout when entering live mode
-    const initTimer = setTimeout(resetControlsTimeout, 0);
+    resetControlsTimeout();
 
     return () => {
-      clearTimeout(initTimer);
       window.removeEventListener('mousemove', handleUserActivity);
       window.removeEventListener('keydown', handleUserActivity);
       window.removeEventListener('touchstart', handleUserActivity);
@@ -126,6 +132,13 @@ export default function App() {
       if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
     };
   }, [viewMode, resetControlsTimeout]);
+
+  // When channel menu or settings close in live mode, ensure auto-hide starts
+  useEffect(() => {
+    if (viewMode === 'live' && !isChannelMenuOpen && !isSettingsOpen) {
+      resetControlsTimeout();
+    }
+  }, [viewMode, isChannelMenuOpen, isSettingsOpen, resetControlsTimeout]);
 
   // ── Load centralized config from Vercel (Redis) on mount ──
   useEffect(() => {
@@ -288,6 +301,13 @@ export default function App() {
       if (!isSettingsOpen && (e.key === 's' || e.key === 'S' || e.key === 'Settings')) {
         e.preventDefault();
         setIsSettingsOpen(true);
+        return;
+      }
+
+      // Toggle / Hide controls immediately on 'h' or 'Info' key on TV remote
+      if (viewMode === 'live' && !isSettingsOpen && !isChannelMenuOpen && (e.key === 'h' || e.key === 'H' || e.key === 'Info')) {
+        e.preventDefault();
+        setIsControlsVisible(prev => !prev);
         return;
       }
 

@@ -41,7 +41,7 @@ public class MainActivity extends Activity {
         myWebView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
         setContentView(myWebView);
 
-        // Configure WebView Settings — optimized for streaming performance
+        // Configure WebView Settings — optimized for maximum streaming speed & responsiveness
         WebSettings webSettings = myWebView.getSettings();
         webSettings.setJavaScriptEnabled(true);
         webSettings.setDomStorageEnabled(true);
@@ -50,11 +50,9 @@ public class MainActivity extends Activity {
         webSettings.setLoadsImagesAutomatically(true);
         webSettings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
 
-        // ── Performance: Aggressive caching ──
-        // App cache keeps Vercel's static assets (JS/CSS/SVG) on-device
+        // ── Performance: Aggressive caching & RAM acceleration ──
         webSettings.setCacheMode(WebSettings.LOAD_DEFAULT);
 
-        // ── Performance: Rendering pipeline ──
         // Force hardware-accelerated compositing for smoother scrolling/animation
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             myWebView.setRendererPriorityPolicy(WebView.RENDERER_PRIORITY_IMPORTANT, false);
@@ -75,7 +73,7 @@ public class MainActivity extends Activity {
         webSettings.setLoadWithOverviewMode(true);
         myWebView.setInitialScale(0);
 
-        // ── Performance: Disable unnecessary features for TV kiosk ──
+        // ── Performance: Disable unused mobile-only overhead ──
         webSettings.setSupportZoom(false);
         webSettings.setBuiltInZoomControls(false);
         webSettings.setDisplayZoomControls(false);
@@ -110,7 +108,6 @@ public class MainActivity extends Activity {
 
             @Override
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
-                // Keep fullscreen during page transitions
                 makeFullscreen();
             }
 
@@ -130,15 +127,13 @@ public class MainActivity extends Activity {
         myWebView.setWebChromeClient(new WebChromeClient() {
             @Override
             public void onProgressChanged(WebView view, int progress) {
-                // Keep fullscreen stable during load
                 if (progress >= 100) {
                     makeFullscreen();
                 }
             }
         });
 
-        // ── Preconnect: start TLS handshake early ──
-        // Inject DNS prefetch for the production API domain on the initial page
+        // Load production app
         myWebView.loadUrl(REMOTE_URL);
     }
 
@@ -155,7 +150,6 @@ public class MainActivity extends Activity {
         super.onResume();
         if (myWebView != null) {
             myWebView.onResume();
-            // Resume JS timers that were paused
             myWebView.resumeTimers();
         }
         makeFullscreen();
@@ -165,7 +159,6 @@ public class MainActivity extends Activity {
     protected void onPause() {
         if (myWebView != null) {
             myWebView.onPause();
-            // Pause JS timers to save battery/CPU when app is in background
             myWebView.pauseTimers();
         }
         super.onPause();
@@ -207,6 +200,11 @@ public class MainActivity extends Activity {
                         "window.dispatchEvent(new KeyboardEvent('keydown', {key: 'ChannelDown', bubbles: true, cancelable: true}));",
                         null);
                 return true;
+            } else if (keyCode == KeyEvent.KEYCODE_INFO) {
+                myWebView.evaluateJavascript(
+                        "window.dispatchEvent(new KeyboardEvent('keydown', {key: 'Info', bubbles: true, cancelable: true}));",
+                        null);
+                return true;
             }
         }
         return super.dispatchKeyEvent(event);
@@ -228,7 +226,6 @@ public class MainActivity extends Activity {
     private void makeFullscreen() {
         View decorView = getWindow().getDecorView();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            // Android 11+ modern WindowInsetsController API
             getWindow().setDecorFitsSystemWindows(false);
             android.view.WindowInsetsController controller = decorView.getWindowInsetsController();
             if (controller != null) {
@@ -237,7 +234,6 @@ public class MainActivity extends Activity {
                         android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
             }
         } else {
-            // Legacy API for Android 10 and below
             int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                     | View.SYSTEM_UI_FLAG_FULLSCREEN
                     | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY

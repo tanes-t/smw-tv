@@ -239,7 +239,8 @@ button {
 }
 
 .stream-item.focused {
-  background: #ffffff; /* [50% White Focused] */
+  background: #ffffff;
+  /* [50% White Focused] */
   border-color: var(--accent);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), 0 0 16px rgba(229, 9, 20, 0.3);
   transform: scale(1.04);
@@ -258,7 +259,8 @@ button {
 .stream-item.active {
   background: rgba(229, 9, 20, 0.16);
   border-color: var(--accent);
-  border-left: 5px solid var(--accent); /* [20% Red Left Accent] */
+  border-left: 5px solid var(--accent);
+  /* [20% Red Left Accent] */
   box-shadow: 0 0 16px rgba(229, 9, 20, 0.25);
 }
 
@@ -595,7 +597,8 @@ button {
 }
 
 .rail-card {
-  background: #ffffff; /* [50% White Card] */
+  background: #ffffff;
+  /* [50% White Card] */
   border: 1px solid #cbd5e1;
   border-radius: 8px;
   color: #0f172a;
@@ -614,7 +617,8 @@ button {
 }
 
 .rail-card span {
-  color: var(--accent); /* [20% Red Category] */
+  color: var(--accent);
+  /* [20% Red Category] */
   font-size: 0.72rem;
   font-weight: 800;
   letter-spacing: 0.12em;
@@ -868,6 +872,7 @@ button {
     opacity: 0;
     transform: scale(0.9) translateY(-10px);
   }
+
   to {
     opacity: 1;
     transform: scale(1) translateY(0);
@@ -1430,7 +1435,8 @@ button {
 }
 
 .tv-card {
-  background: #ffffff; /* [50% White Card] */
+  background: #ffffff;
+  /* [50% White Card] */
   border: 1px solid #e2e8f0;
   border-radius: 8px;
   padding: 1.1rem 1.2rem;
@@ -1451,7 +1457,8 @@ button {
   left: 0;
   right: 0;
   height: 4px;
-  background: var(--accent); /* [20% Red Top Accent] */
+  background: var(--accent);
+  /* [20% Red Top Accent] */
   opacity: 1;
 }
 
@@ -1477,7 +1484,8 @@ button {
   line-height: 1.1;
   font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
   letter-spacing: -0.02em;
-  color: #0f172a; /* Ultra crisp dark slate */
+  color: #0f172a;
+  /* Ultra crisp dark slate */
 }
 
 .card-subtext {
@@ -1489,7 +1497,8 @@ button {
 
 /* ── Data Table (Crisp White High-Contrast) ── */
 .tv-table-wrap {
-  background: #ffffff; /* [50% White Table Canvas] */
+  background: #ffffff;
+  /* [50% White Table Canvas] */
   border: 1px solid #e2e8f0;
   border-radius: 8px;
   display: flex;
@@ -1514,7 +1523,8 @@ button {
 .table-channel-badge {
   background: #fef2f2;
   border: 1px solid #fecaca;
-  color: var(--accent); /* [20% Red Badge] */
+  color: var(--accent);
+  /* [20% Red Badge] */
   padding: 0.2rem 0.65rem;
   border-radius: 4px;
   font-size: 0.72rem;
@@ -1831,13 +1841,15 @@ button {
 }
 
 .nav-link-btn:hover {
-  background: #ffffff; /* [50% White] */
+  background: #ffffff;
+  /* [50% White] */
   color: #0f172a;
   border-color: #ffffff;
 }
 
 .nav-link-btn.active {
-  background: var(--accent); /* [20% Red Active] */
+  background: var(--accent);
+  /* [20% Red Active] */
   border-color: var(--accent);
   color: #ffffff;
   font-weight: 800;
@@ -2149,7 +2161,8 @@ button {
 }
 
 .row-title {
-  color: #ffffff; /* [50% Luminous White] */
+  color: #ffffff;
+  /* [50% Luminous White] */
   font-size: 1.4rem;
   font-weight: 900;
   letter-spacing: -0.01em;
@@ -2163,12 +2176,14 @@ button {
   display: inline-block;
   width: 4px;
   height: 1.15em;
-  background: var(--accent); /* [20% Red Leading Stripe] */
+  background: var(--accent);
+  /* [20% Red Leading Stripe] */
   border-radius: 2px;
 }
 
 .row-subtitle {
-  color: #cbd5e1; /* Crisp Slate Light */
+  color: #cbd5e1;
+  /* Crisp Slate Light */
   font-size: 0.88rem;
   font-weight: 600;
 }
@@ -2232,7 +2247,8 @@ button {
 }
 
 .card-ch-pill {
-  background: var(--accent); /* [20% Red] */
+  background: var(--accent);
+  /* [20% Red] */
   border-radius: 4px;
   color: #ffffff;
   font-size: 0.75rem;
@@ -2243,7 +2259,8 @@ button {
 }
 
 .card-live-dot {
-  background: #10b981; /* [10% Semantic Green] */
+  background: #10b981;
+  /* [10% Semantic Green] */
   border-radius: 50%;
   box-shadow: 0 0 8px #10b981;
   height: 8px;
@@ -2290,7 +2307,8 @@ button {
 }
 
 .card-circle-btn.play-circle-btn {
-  background: var(--accent); /* [20% Red] */
+  background: var(--accent);
+  /* [20% Red] */
   border-color: var(--accent);
   color: #ffffff;
 }
@@ -2303,14 +2321,16 @@ button {
 }
 
 .card-match-text {
-  color: #10b981; /* [10% Semantic Green] */
+  color: #10b981;
+  /* [10% Semantic Green] */
   font-size: 0.75rem;
   font-weight: 800;
   margin-left: auto;
 }
 
 .card-title {
-  color: #0f172a; /* [50% Crisp Deep Dark on White] */
+  color: #0f172a;
+  /* [50% Crisp Deep Dark on White] */
   font-size: 1.05rem;
   font-weight: 800;
   line-height: 1.25;
@@ -2338,13 +2358,15 @@ button {
 .card-tag.hd-tag {
   background: #ecfeff;
   border-color: #a5f3fc;
-  color: #0891b2; /* [10% Cyan] */
+  color: #0891b2;
+  /* [10% Cyan] */
 }
 
 .card-tag.live-tag {
   background: #fef2f2;
   border-color: #fecaca;
-  color: #dc2626; /* [20% Red] */
+  color: #dc2626;
+  /* [20% Red] */
   font-weight: 800;
 }
 
@@ -2371,7 +2393,8 @@ button {
 }
 
 .netflix-modal-content {
-  background: #ffffff; /* [50% White Modal Body] */
+  background: #ffffff;
+  /* [50% White Modal Body] */
   border: 1px solid #e2e8f0;
   border-radius: 12px;
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.75);
@@ -2438,7 +2461,8 @@ button {
 }
 
 .modal-badge {
-  background: var(--accent); /* [20% Red Badge] */
+  background: var(--accent);
+  /* [20% Red Badge] */
   border-radius: 4px;
   color: #ffffff;
   display: inline-block;
@@ -2449,7 +2473,8 @@ button {
 }
 
 .modal-title {
-  color: #0f172a; /* Ultra crisp dark title on white */
+  color: #0f172a;
+  /* Ultra crisp dark title on white */
   font-size: 2.2rem;
   font-weight: 900;
   text-shadow: 0 1px 4px rgba(255, 255, 255, 0.8);
@@ -2525,11 +2550,13 @@ button {
   z-index: 101;
 }
 
-.stream-top-sensor:hover~.stream-top-bar,
-.stream-top-bar:hover {
-  opacity: 1 !important;
-  pointer-events: auto !important;
-  transform: translateY(0) !important;
+@media (hover: hover) and (pointer: fine) {
+  .stream-top-sensor:hover~.stream-top-bar:not(.hidden),
+  .stream-top-bar:not(.hidden):hover {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    transform: translateY(0) !important;
+  }
 }
 
 /* ── Unified TV Stage Top Navigation Bar (Non-overlapping) ── */
@@ -2548,10 +2575,11 @@ button {
   z-index: 100;
 }
 
-.stream-top-bar.hidden {
-  opacity: 0;
-  pointer-events: none;
-  transform: translateY(-100%);
+.stream-top-bar.hidden,
+.stream-stage.controls-hidden .stream-top-bar {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transform: translateY(-100%) !important;
 }
 
 .top-bar-left,
@@ -3600,7 +3628,8 @@ button {
 }
 
 /* ── Android TV (960x540 CSS dp @2x) & Compact Viewport Adaptation ── */
-@media (max-width: 1280px), (max-height: 680px) {
+@media (max-width: 1280px),
+(max-height: 680px) {
   .netflix-nav {
     height: 58px;
     padding: 0 1.5rem;
@@ -3678,7 +3707,8 @@ button {
   }
 }
 
-@media (max-width: 1050px), (max-height: 580px) {
+@media (max-width: 1050px),
+(max-height: 580px) {
   .netflix-nav {
     height: 52px;
     padding: 0 1rem;
@@ -3791,7 +3821,8 @@ button {
 
 
 /* ── Android TV (960x540 CSS dp @2x) & Compact Viewport Adaptation ── */
-@media (max-width: 1280px), (max-height: 680px) {
+@media (max-width: 1280px),
+(max-height: 680px) {
   .netflix-nav {
     height: 58px;
     padding: 0 1.5rem;
@@ -3869,7 +3900,8 @@ button {
   }
 }
 
-@media (max-width: 1050px), (max-height: 580px) {
+@media (max-width: 1050px),
+(max-height: 580px) {
   .netflix-nav {
     height: 52px;
     padding: 0 1rem;
