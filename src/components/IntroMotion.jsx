@@ -36,58 +36,46 @@ export default function IntroMotion({ onComplete }) {
       // Ta (Sub Bass Impact)
       const osc1 = ctx.createOscillator();
       const gain1 = ctx.createGain();
-      osc1.type = 'sawtooth';
-      osc1.frequency.setValueAtTime(65, ctx.currentTime);
-      osc1.frequency.exponentialRampToValueAtTime(32, ctx.currentTime + 0.5);
-      gain1.gain.setValueAtTime(0.4, ctx.currentTime);
-      gain1.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
+      osc1.type = 'triangle';
+      osc1.frequency.setValueAtTime(80, ctx.currentTime);
+      osc1.frequency.exponentialRampToValueAtTime(38, ctx.currentTime + 0.4);
+      gain1.gain.setValueAtTime(0.35, ctx.currentTime);
+      gain1.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.45);
       osc1.connect(gain1);
       gain1.connect(ctx.destination);
       osc1.start();
-      osc1.stop(ctx.currentTime + 0.6);
+      osc1.stop(ctx.currentTime + 0.45);
 
-      // Dum (Deep Warm Resonant Industrial Chime)
+      // Dum (Deep Warm Industrial Harmony)
       setTimeout(() => {
         if (ctx.state === 'closed') return;
         const now = ctx.currentTime;
         
-        // Root Note
+        // Root Note (C3)
         const osc2 = ctx.createOscillator();
         const gain2 = ctx.createGain();
-        osc2.type = 'triangle';
-        osc2.frequency.setValueAtTime(130.81, now); // C3
-        osc2.frequency.exponentialRampToValueAtTime(123.47, now + 1.2);
-        gain2.gain.setValueAtTime(0.5, now);
-        gain2.gain.exponentialRampToValueAtTime(0.001, now + 1.6);
+        osc2.type = 'sine';
+        osc2.frequency.setValueAtTime(130.81, now);
+        osc2.frequency.exponentialRampToValueAtTime(123.47, now + 1.0);
+        gain2.gain.setValueAtTime(0.4, now);
+        gain2.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
         osc2.connect(gain2);
         gain2.connect(ctx.destination);
         osc2.start(now);
-        osc2.stop(now + 1.6);
+        osc2.stop(now + 1.2);
 
         // Fifth Harmony (G3)
         const osc3 = ctx.createOscillator();
         const gain3 = ctx.createGain();
         osc3.type = 'sine';
         osc3.frequency.setValueAtTime(196.00, now);
-        gain3.gain.setValueAtTime(0.3, now);
-        gain3.gain.exponentialRampToValueAtTime(0.001, now + 1.8);
+        gain3.gain.setValueAtTime(0.25, now);
+        gain3.gain.exponentialRampToValueAtTime(0.001, now + 1.3);
         osc3.connect(gain3);
         gain3.connect(ctx.destination);
         osc3.start(now);
-        osc3.stop(now + 1.8);
-
-        // High Shimmer (C5 Bell)
-        const osc4 = ctx.createOscillator();
-        const gain4 = ctx.createGain();
-        osc4.type = 'sine';
-        osc4.frequency.setValueAtTime(523.25, now);
-        gain4.gain.setValueAtTime(0.15, now);
-        gain4.gain.exponentialRampToValueAtTime(0.0001, now + 2.0);
-        osc4.connect(gain4);
-        gain4.connect(ctx.destination);
-        osc4.start(now);
-        osc4.stop(now + 2.0);
-      }, 250);
+        osc3.stop(now + 1.3);
+      }, 200);
     } catch {
       // Audio autoplay policies may block, continue visually without error
     }

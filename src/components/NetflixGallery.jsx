@@ -149,7 +149,7 @@ export default function NetflixGallery({
         return;
       }
 
-      const topNavMaxCol = onReplayIntro ? 6 : 5;
+      const topNavMaxCol = onReplayIntro ? 5 : 4;
 
       if (e.key === 'ArrowDown') {
         e.preventDefault();
@@ -183,9 +183,8 @@ export default function NetflixGallery({
           else if (focusedCol === 1) setActiveCategoryFilter('FACTORY');
           else if (focusedCol === 2) setActiveCategoryFilter('LOGISTICS');
           else if (focusedCol === 3) setActiveCategoryFilter('CCTV');
-          else if (focusedCol === 4) document.getElementById('gallery-search-input')?.focus();
-          else if (focusedCol === 5 && onReplayIntro) onReplayIntro();
-          else if ((focusedCol === 6 && onReplayIntro) || (focusedCol === 5 && !onReplayIntro)) onOpenSettings?.();
+          else if (focusedCol === 4 && onReplayIntro) onReplayIntro();
+          else if ((focusedCol === 5 && onReplayIntro) || (focusedCol === 4 && !onReplayIntro)) onOpenSettings?.();
         } else if (focusedRow === 0) {
           // Hero actions
           if (focusedCol === 0 && selectedHeroChannel) {
@@ -310,24 +309,6 @@ export default function NetflixGallery({
         </div>
 
         <div className="netflix-nav-right">
-          {/* Search box */}
-          <div className={`netflix-search-box ${focusedRow === -1 && focusedCol === 4 ? 'focused' : ''}`}>
-            <span className="search-icon"><SearchIcon size={16} /></span>
-            <input
-              id="gallery-search-input"
-              type="text"
-              placeholder="ค้นหาช่อง, แผนก, ชิ้นงาน..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="netflix-search-input"
-            />
-            {searchQuery && (
-              <button className="clear-search-btn" onClick={() => setSearchQuery('')} aria-label="ล้างการค้นหา">
-                <CloseIcon size={14} />
-              </button>
-            )}
-          </div>
-
           {/* Live broadcast pill */}
           <div className="broadcast-indicator">
             <span className="live-pulse-dot" />
@@ -342,7 +323,7 @@ export default function NetflixGallery({
           {/* Replay Intro button */}
           {onReplayIntro && (
             <button
-              className={`gallery-settings-btn ${focusedRow === -1 && focusedCol === 5 ? 'focused' : ''}`}
+              className={`gallery-settings-btn ${focusedRow === -1 && focusedCol === 4 ? 'focused' : ''}`}
               onClick={onReplayIntro}
               title="เล่นโมชั่นเปิดตัว (Replay Intro Animation)"
               aria-label="เล่นโมชั่นเปิดตัว"
@@ -353,7 +334,7 @@ export default function NetflixGallery({
 
           {/* Settings button */}
           <button
-            className={`gallery-settings-btn ${focusedRow === -1 && focusedCol === (onReplayIntro ? 6 : 5) ? 'focused' : ''}`}
+            className={`gallery-settings-btn ${focusedRow === -1 && focusedCol === (onReplayIntro ? 5 : 4) ? 'focused' : ''}`}
             onClick={onOpenSettings}
             title="ตั้งค่าระบบ (Settings)"
             aria-label="ตั้งค่าระบบ"
