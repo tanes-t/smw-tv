@@ -60,7 +60,7 @@ export default function LiveStageContainer({
             key={`iframe-${activeChannel?.no}`}
             src={playerUrl}
             title={getChannelName(activeChannel)}
-            allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
+            allow="autoplay; encrypted-media; fullscreen; picture-in-picture; screen-wake-lock"
             referrerPolicy="strict-origin-when-cross-origin"
             className="stream-frame"
             tabIndex={-1}

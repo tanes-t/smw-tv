@@ -1,8 +1,17 @@
 export async function loadRemoteChannelConfig() {
-  const response = await fetch('/api/channels', { cache: 'no-store' });
-  if (!response.ok) throw new Error(`Configuration API HTTP ${response.status}`);
-  const payload = await response.json();
-  return Array.isArray(payload.channels) ? payload.channels : [];
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 5000);
+  try {
+    const response = await fetch('/api/channels', {
+      cache: 'no-store',
+      signal: controller.signal
+    });
+    if (!response.ok) throw new Error(`Configuration API HTTP ${response.status}`);
+    const payload = await response.json();
+    return Array.isArray(payload.channels) ? payload.channels : [];
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 export async function saveRemoteChannelConfig(channels) {

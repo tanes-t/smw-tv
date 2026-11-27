@@ -120,14 +120,36 @@ export default function NetflixGallery({
   // Keyboard navigation for TV Remote
   useEffect(() => {
     const handleKeyDown = (e) => {
-      // If modal is open, Escape closes it
-      if (infoModalChannel) {
-        if (e.key === 'Escape' || e.key === 'Backspace') {
-          setInfoModalChannel(null);
+      // Skip if user is typing in search box unless pressing Escape/ArrowDown
+      const activeTag = document.activeElement?.tagName;
+      if (activeTag === 'INPUT') {
+        if (e.key === 'Escape') {
+          document.activeElement.blur();
+          e.preventDefault();
+        } else if (e.key === 'ArrowDown') {
+          document.activeElement.blur();
+          setFocusedRow(0);
+          setFocusedCol(0);
           e.preventDefault();
         }
         return;
       }
+
+      // If modal is open, Escape closes it, Enter plays channel
+      if (infoModalChannel) {
+        if (e.key === 'Escape' || e.key === 'Backspace') {
+          setInfoModalChannel(null);
+          e.preventDefault();
+        } else if (e.key === 'Enter' || e.key === ' ' || e.key === 'DPadCenter' || e.key === 'Select') {
+          const ch = infoModalChannel;
+          setInfoModalChannel(null);
+          onSelectChannel(ch);
+          e.preventDefault();
+        }
+        return;
+      }
+
+      const topNavMaxCol = onReplayIntro ? 6 : 5;
 
       if (e.key === 'ArrowDown') {
         e.preventDefault();
@@ -135,11 +157,13 @@ export default function NetflixGallery({
         setFocusedCol(0);
       } else if (e.key === 'ArrowUp') {
         e.preventDefault();
-        setFocusedRow(prev => Math.max(prev - 1, 0));
+        setFocusedRow(prev => Math.max(prev - 1, -1));
         setFocusedCol(0);
       } else if (e.key === 'ArrowRight') {
         e.preventDefault();
-        if (focusedRow === 0) {
+        if (focusedRow === -1) {
+          setFocusedCol(prev => Math.min(prev + 1, topNavMaxCol));
+        } else if (focusedRow === 0) {
           // In Hero
           setFocusedCol(prev => Math.min(prev + 1, 1));
         } else {
@@ -151,9 +175,18 @@ export default function NetflixGallery({
       } else if (e.key === 'ArrowLeft') {
         e.preventDefault();
         setFocusedCol(prev => Math.max(prev - 1, 0));
-      } else if (e.key === 'Enter') {
+      } else if (e.key === 'Enter' || e.key === ' ' || e.key === 'DPadCenter' || e.key === 'Select') {
         e.preventDefault();
-        if (focusedRow === 0) {
+        if (focusedRow === -1) {
+          // Top Navigation Bar actions
+          if (focusedCol === 0) setActiveCategoryFilter('ALL');
+          else if (focusedCol === 1) setActiveCategoryFilter('FACTORY');
+          else if (focusedCol === 2) setActiveCategoryFilter('LOGISTICS');
+          else if (focusedCol === 3) setActiveCategoryFilter('CCTV');
+          else if (focusedCol === 4) document.getElementById('gallery-search-input')?.focus();
+          else if (focusedCol === 5 && onReplayIntro) onReplayIntro();
+          else if ((focusedCol === 6 && onReplayIntro) || (focusedCol === 5 && !onReplayIntro)) onOpenSettings?.();
+        } else if (focusedRow === 0) {
           // Hero actions
           if (focusedCol === 0 && selectedHeroChannel) {
             onSelectChannel(selectedHeroChannel);
@@ -171,11 +204,11 @@ export default function NetflixGallery({
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [focusedRow, focusedCol, rows, selectedHeroChannel, infoModalChannel, channels, onSelectChannel]);
+  }, [focusedRow, focusedCol, rows, selectedHeroChannel, infoModalChannel, channels, onSelectChannel, onReplayIntro, onOpenSettings]);
 
   // Auto-scroll vertically and horizontally when TV remote navigates (instant for TV)
   useEffect(() => {
-    if (focusedRow === 0) {
+    if (focusedRow <= 0) {
       const container = document.getElementById('netflix-gallery-container');
       if (container) {
         container.scrollTo({ top: 0, behavior: 'instant' });
@@ -236,7 +269,7 @@ export default function NetflixGallery({
     }
   };
 
-  const heroChannel = selectedHeroChannel || channels[0] || {};
+  const heroChannel = (selectedHeroChannel && channels.find(c => c.no === selectedHeroChannel.no)) || channels[0] || {};
   const heroData = channelDataMap[heroChannel.no] || {};
 
   return (
@@ -250,25 +283,25 @@ export default function NetflixGallery({
 
           <div className="netflix-nav-links">
             <button
-              className={`nav-link-btn ${activeCategoryFilter === 'ALL' ? 'active' : ''}`}
+              className={`nav-link-btn ${activeCategoryFilter === 'ALL' ? 'active' : ''} ${focusedRow === -1 && focusedCol === 0 ? 'focused' : ''}`}
               onClick={() => setActiveCategoryFilter('ALL')}
             >
               หน้าแรก (Home)
             </button>
             <button
-              className={`nav-link-btn ${activeCategoryFilter === 'FACTORY' ? 'active' : ''}`}
+              className={`nav-link-btn ${activeCategoryFilter === 'FACTORY' ? 'active' : ''} ${focusedRow === -1 && focusedCol === 1 ? 'focused' : ''}`}
               onClick={() => setActiveCategoryFilter('FACTORY')}
             >
               โรงงาน & สายการผลิต
             </button>
             <button
-              className={`nav-link-btn ${activeCategoryFilter === 'LOGISTICS' ? 'active' : ''}`}
+              className={`nav-link-btn ${activeCategoryFilter === 'LOGISTICS' ? 'active' : ''} ${focusedRow === -1 && focusedCol === 2 ? 'focused' : ''}`}
               onClick={() => setActiveCategoryFilter('LOGISTICS')}
             >
               คลังสินค้า & ขนส่ง
             </button>
             <button
-              className={`nav-link-btn ${activeCategoryFilter === 'CCTV' ? 'active' : ''}`}
+              className={`nav-link-btn ${activeCategoryFilter === 'CCTV' ? 'active' : ''} ${focusedRow === -1 && focusedCol === 3 ? 'focused' : ''}`}
               onClick={() => setActiveCategoryFilter('CCTV')}
             >
               กล้อง & ความปลอดภัย
@@ -278,9 +311,10 @@ export default function NetflixGallery({
 
         <div className="netflix-nav-right">
           {/* Search box */}
-          <div className="netflix-search-box">
+          <div className={`netflix-search-box ${focusedRow === -1 && focusedCol === 4 ? 'focused' : ''}`}>
             <span className="search-icon"><SearchIcon size={16} /></span>
             <input
+              id="gallery-search-input"
               type="text"
               placeholder="ค้นหาช่อง, แผนก, ชิ้นงาน..."
               value={searchQuery}
@@ -308,7 +342,7 @@ export default function NetflixGallery({
           {/* Replay Intro button */}
           {onReplayIntro && (
             <button
-              className="gallery-settings-btn"
+              className={`gallery-settings-btn ${focusedRow === -1 && focusedCol === 5 ? 'focused' : ''}`}
               onClick={onReplayIntro}
               title="เล่นโมชั่นเปิดตัว (Replay Intro Animation)"
               aria-label="เล่นโมชั่นเปิดตัว"
@@ -319,7 +353,7 @@ export default function NetflixGallery({
 
           {/* Settings button */}
           <button
-            className="gallery-settings-btn"
+            className={`gallery-settings-btn ${focusedRow === -1 && focusedCol === (onReplayIntro ? 6 : 5) ? 'focused' : ''}`}
             onClick={onOpenSettings}
             title="ตั้งค่าระบบ (Settings)"
             aria-label="ตั้งค่าระบบ"

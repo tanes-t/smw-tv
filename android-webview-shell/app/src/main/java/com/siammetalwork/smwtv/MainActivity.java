@@ -16,7 +16,7 @@ import android.webkit.WebViewClient;
 public class MainActivity extends Activity {
 
     private WebView myWebView;
-    
+
     private static final String REMOTE_URL = "https://smw-tv.vercel.app/";
     // Offline fallback for devices without a network connection.
     private static final String DEFAULT_URL = "file:///android_asset/index.html";
@@ -33,8 +33,9 @@ public class MainActivity extends Activity {
         // Set to full screen immersive layout (hide status bar, navigation bar)
         makeFullscreen();
 
-        // Create WebView dynamically
+        // Create WebView dynamically with Hardware Acceleration for smooth Android TV rendering
         myWebView = new WebView(this);
+        myWebView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
         setContentView(myWebView);
 
         // Configure WebView Settings
@@ -47,7 +48,7 @@ public class MainActivity extends Activity {
         webSettings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
         CookieManager.getInstance().setAcceptCookie(true);
         CookieManager.getInstance().setAcceptThirdPartyCookies(myWebView, true);
-        
+
         // Enable file access for loading local asset index.html
         webSettings.setAllowFileAccess(true);
         webSettings.setAllowContentAccess(true);
@@ -55,12 +56,12 @@ public class MainActivity extends Activity {
         // WebView treats file:// pages as an opaque origin unless these are enabled.
         webSettings.setAllowFileAccessFromFileURLs(true);
         webSettings.setAllowUniversalAccessFromFileURLs(true);
-        
+
         // Enable viewport support for responsive grids
         webSettings.setUseWideViewPort(true);
-        webSettings.setLoadWithOverviewMode(false);
-        myWebView.setInitialScale(100);
-        
+        webSettings.setLoadWithOverviewMode(true);
+        myWebView.setInitialScale(0);
+
         // Focus configuration for TV Remote (D-pad) compatibility
         myWebView.setFocusable(true);
         myWebView.setFocusableInTouchMode(true);
@@ -91,8 +92,7 @@ public class MainActivity extends Activity {
             public void onReceivedError(
                     WebView view,
                     android.webkit.WebResourceRequest request,
-                    android.webkit.WebResourceError error
-            ) {
+                    android.webkit.WebResourceError error) {
                 if (request.isForMainFrame() && !hasLoadedOfflineFallback) {
                     hasLoadedOfflineFallback = true;
                     view.loadUrl(DEFAULT_URL);
@@ -100,8 +100,10 @@ public class MainActivity extends Activity {
             }
         });
 
-        // Load the deployed Vercel production app so backend & channel updates take effect immediately
-        // Automatically falls back to DEFAULT_URL (local asset) if offline or network fails
+        // Load the deployed Vercel production app so backend & channel updates take
+        // effect immediately
+        // Automatically falls back to DEFAULT_URL (local asset) if offline or network
+        // fails
         myWebView.loadUrl(REMOTE_URL);
     }
 
@@ -116,18 +118,52 @@ public class MainActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
+        if (myWebView != null) {
+            myWebView.onResume();
+        }
         makeFullscreen();
     }
 
     @Override
+    protected void onPause() {
+        if (myWebView != null) {
+            myWebView.onPause();
+        }
+        super.onPause();
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (myWebView != null) {
+            myWebView.destroy();
+            myWebView = null;
+        }
+        super.onDestroy();
+    }
+
+    @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
-        if (event.getAction() == KeyEvent.ACTION_DOWN && event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
-            // Forward Back key directly to web app as Escape event for clean React navigation
-            if (myWebView != null) {
+        if (event.getAction() == KeyEvent.ACTION_DOWN && myWebView != null) {
+            int keyCode = event.getKeyCode();
+            if (keyCode == KeyEvent.KEYCODE_BACK) {
                 myWebView.evaluateJavascript(
-                    "window.dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape', bubbles: true, cancelable: true}));",
-                    null
-                );
+                        "window.dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape', bubbles: true, cancelable: true}));",
+                        null);
+                return true;
+            } else if (keyCode == KeyEvent.KEYCODE_MENU) {
+                myWebView.evaluateJavascript(
+                        "window.dispatchEvent(new KeyboardEvent('keydown', {key: 'Menu', bubbles: true, cancelable: true}));",
+                        null);
+                return true;
+            } else if (keyCode == KeyEvent.KEYCODE_CHANNEL_UP) {
+                myWebView.evaluateJavascript(
+                        "window.dispatchEvent(new KeyboardEvent('keydown', {key: 'ChannelUp', bubbles: true, cancelable: true}));",
+                        null);
+                return true;
+            } else if (keyCode == KeyEvent.KEYCODE_CHANNEL_DOWN) {
+                myWebView.evaluateJavascript(
+                        "window.dispatchEvent(new KeyboardEvent('keydown', {key: 'ChannelDown', bubbles: true, cancelable: true}));",
+                        null);
                 return true;
             }
         }
@@ -138,9 +174,8 @@ public class MainActivity extends Activity {
     public void onBackPressed() {
         if (myWebView != null) {
             myWebView.evaluateJavascript(
-                "window.dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape', bubbles: true, cancelable: true}));",
-                null
-            );
+                    "window.dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape', bubbles: true, cancelable: true}));",
+                    null);
         }
     }
 
@@ -150,10 +185,12 @@ public class MainActivity extends Activity {
     private void makeFullscreen() {
         View decorView = getWindow().getDecorView();
         int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                      | View.SYSTEM_UI_FLAG_FULLSCREEN
-                      | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                      | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                | View.SYSTEM_UI_FLAG_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
 
-                      | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                      | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
-        deco
+                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
+        decorView.setSystemUiVisibility(uiOptions);
+    }
+}

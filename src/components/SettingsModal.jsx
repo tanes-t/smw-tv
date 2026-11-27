@@ -459,9 +459,34 @@ function SettingsForm({
         if (e.key === 'Backspace' || e.key === 'Delete') {
           e.stopPropagation();
         }
-        if (e.key === 'Escape') {
+        if (e.key === 'Escape' || e.key === 'Back') {
           e.stopPropagation();
-          onClose();
+          e.preventDefault();
+          if (jsonBackupOpen) {
+            setJsonBackupOpen(false);
+          } else {
+            onClose();
+          }
+          return;
+        }
+        // D-pad Up/Down navigation across focusable controls when not typing in text/select
+        const tag = e.target?.tagName;
+        const isTextControl = tag === 'TEXTAREA' || tag === 'SELECT' || (tag === 'INPUT' && e.target.type !== 'checkbox');
+        if (!isTextControl && (e.key === 'ArrowDown' || e.key === 'ArrowUp')) {
+          const scope = jsonBackupOpen
+            ? e.currentTarget.querySelector('.hub-submodal-card')
+            : e.currentTarget.querySelector('.settings-card');
+          if (!scope) return;
+          const focusables = Array.from(
+            scope.querySelectorAll('button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex="0"]')
+          ).filter((el) => el.offsetParent !== null);
+          if (!focusables.length) return;
+          const idx = focusables.indexOf(document.activeElement);
+          const nextIdx = e.key === 'ArrowDown'
+            ? (idx === -1 ? 0 : Math.min(idx + 1, focusables.length - 1))
+            : (idx <= 0 ? 0 : idx - 1);
+          focusables[nextIdx]?.focus();
+          e.preventDefault();
         }
       }}
     >
@@ -472,7 +497,7 @@ function SettingsForm({
             <SettingsIcon size={20} />
             <span>SMW STREAM • CHANNEL & SYSTEM HUB</span>
           </div>
-          <button className="settings-close-btn" onClick={onClose} aria-label="ปิดหน้าต่าง">
+          <button className="settings-close-btn" onClick={onClose} aria-label="ปิดหน้าต่าง" autoFocus>
             <CloseIcon size={18} />
           </button>
         </div>
@@ -502,7 +527,17 @@ function SettingsForm({
                 return (
                   <div
                     key={ch._id}
+                    role="button"
+                    tabIndex={0}
                     className={`hub-channel-row ${isSelected ? 'selected' : ''} ${!isVisible ? 'disabled-channel' : ''}`}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ' || e.key === 'DPadCenter' || e.key === 'Select') {
+                        e.preventDefault();
+                        setSelectedId(ch._id);
+                        setTestStatus(null);
+                        setDeleteConfirmId(null);
+                      }
+                    }}
                     onClick={() => {
                       setSelectedId(ch._id);
                       setTestStatus(null);

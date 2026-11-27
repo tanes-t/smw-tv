@@ -1843,8 +1843,11 @@ button {
   transition: border-color var(--transition-fast), width var(--transition-fast);
 }
 
-.netflix-search-box:focus-within {
+.netflix-search-box:focus-within,
+.netflix-search-box.focused {
   border-color: #ffffff;
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 .search-icon {
@@ -1921,9 +1924,20 @@ button {
   width: 36px;
 }
 
-.gallery-settings-btn:hover {
-  background: rgba(255, 255, 255, 0.18);
+.gallery-settings-btn:hover,
+.gallery-settings-btn.focused {
+  background: rgba(255, 255, 255, 0.22);
   border-color: #ffffff;
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  transform: scale(1.08);
+}
+
+.nav-link-btn.focused {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+  box-shadow: 0 0 14px rgba(229, 9, 20, 0.45);
+  transform: scale(1.05);
 }
 
 /* ── Featured Billboard / Hero Showcase ── */

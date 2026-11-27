@@ -35,6 +35,9 @@ export default function App() {
   const [isControlsVisible, setIsControlsVisible] = useState(true);
   const controlsTimeoutRef = useRef(null);
   const lastSyncTokenRef = useRef(null);
+  const fetchAbortRef = useRef(null);
+  const retryTimerRef = useRef(null);
+  const fetchChannelDataRef = useRef(null);
   const [channels, setChannels] = useState(() => loadCustomChannels());
   const [activeChannelIdx, setActiveChannelIdx] = useState(0);
   const [isChannelMenuOpen, setIsChannelMenuOpen] = useState(false);
@@ -312,8 +315,8 @@ export default function App() {
     isSettingsOpen
   });
 
-  // Fetch API data for active channel
-  const fetchChannelData = useCallback(async (isSilent = false) => {
+  // Fetch API data for active channel (with AbortController, 12s timeout, and 1 auto-retry)
+  const fetchChannelData = useCallback(async (isSilent = false, isRetry = false) => {
     // If the channel is pure iframe or settings, don't fetch JSON API unless configured
     if (isSettingsChannel(activeChannel)) return;
     if (effectiveViewType === 'iframe' && streamUrl) return;
@@ -321,10 +324,22 @@ export default function App() {
     const requestUrl = getChannelApiRequestUrl(activeChannel, apiUrl);
     if (!requestUrl) return;
 
+    if (fetchAbortRef.current) {
+      fetchAbortRef.current.abort();
+    }
+    if (retryTimerRef.current) {
+      clearTimeout(retryTimerRef.current);
+      retryTimerRef.current = null;
+    }
+
+    const controller = new AbortController();
+    fetchAbortRef.current = controller;
+    const timeoutId = setTimeout(() => controller.abort(), 12000);
+
     if (!isSilent) setLoading(true);
 
     try {
-      const response = await fetch(requestUrl);
+      const response = await fetch(requestUrl, { signal: controller.signal });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
       const result = await response.json();
@@ -347,24 +362,41 @@ export default function App() {
       setIsOnline(true);
       setError(null);
     } catch (err) {
-      console.warn(`Fetch error for CH ${activeChannel.no}:`, err);
-      // Keep previous data if already cached, don't blank out screen
-      setError(`เชื่อมต่อ API ไม่ได้: ${err.message}`);
+      if (err.name === 'AbortError' && fetchAbortRef.current !== controller) {
+        // Cancelled because user switched to another channel; ignore cleanly
+        return;
+      }
+      const errMsg = err.name === 'AbortError' ? 'การเชื่อมต่อหมดเวลา (Timeout)' : err.message;
+      console.warn(`Fetch error for CH ${activeChannel.no}:`, errMsg);
+      setError(`เชื่อมต่อ API ไม่ได้: ${errMsg}`);
+      if (!isRetry) {
+        retryTimerRef.current = setTimeout(() => {
+          fetchChannelDataRef.current?.(true, true);
+        }, 2000);
+      }
     } finally {
-      setLoading(false);
+      clearTimeout(timeoutId);
+      if (fetchAbortRef.current === controller) {
+        setLoading(false);
+      }
     }
   }, [activeChannel, apiUrl, effectiveViewType, streamUrl, showToast]);
 
-  // Clock ticker
+  useEffect(() => {
+    fetchChannelDataRef.current = fetchChannelData;
+  }, [fetchChannelData]);
+
+  // Clock ticker (updates only when HH:MM changes to avoid unnecessary gallery re-renders)
   useEffect(() => {
     const tick = () => {
       const now = new Date();
       const pad = (v) => String(v).padStart(2, '0');
-      setClockTime(`${pad(now.getHours())}:${pad(now.getMinutes())}`);
+      const nextTime = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+      setClockTime((prev) => (prev === nextTime ? prev : nextTime));
     };
 
     tick();
-    const interval = setInterval(tick, 1000);
+    const interval = setInterval(tick, 10000);
     return () => clearInterval(interval);
   }, []);
 
@@ -375,6 +407,8 @@ export default function App() {
     return () => {
       clearTimeout(initialFetch);
       clearInterval(interval);
+      if (fetchAbortRef.current) fetchAbortRef.current.abort();
+      if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
     };
   }, [fetchChannelData, refreshInterval]);
 
@@ -419,7 +453,7 @@ export default function App() {
 
   const simulateKeyPress = (keyName) => {
     resetControlsTimeout();
-    const event = new KeyboardEvent('keydown', { key: keyName });
+    const event = new KeyboardEvent('keydown', { key: keyName, bubbles: true, cancelable: true });
     window.dispatchEvent(event);
   };
 
@@ -476,7 +510,8 @@ export default function App() {
           <aside className="stream-sidebar">
 
             <button
-              className="stream-item stream-home-btn"
+              id="stream-item-home"
+              className={`stream-item stream-home-btn ${zone === 'sidebar' && sidebarIndex === -1 ? 'focused' : ''}`}
               onClick={() => {
                 setViewMode('gallery');
                 setIsChannelMenuOpen(false);

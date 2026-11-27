@@ -22,7 +22,6 @@ export function useTVNavigation(config = {}) {
     const cleanup = setTimeout(() => {
       if (isSettingsOpen) {
         setZone('settings');
-        setSettingsIndex(0);
       } else {
         setZone(isChannelMenuOpen ? 'sidebar' : 'content');
       }
@@ -80,7 +79,7 @@ export function useTVNavigation(config = {}) {
         setSidebarIndex(prev => Math.min(prev + 1, sidebarCount - 1));
       } else if (key === 'ArrowUp') {
         e.preventDefault();
-        setSidebarIndex(prev => Math.max(prev - 1, 0));
+        setSidebarIndex(prev => Math.max(prev - 1, -1));
       } else if (key === 'ArrowRight') {
         e.preventDefault();
         if (contentCount > 0) {
@@ -91,9 +90,13 @@ export function useTVNavigation(config = {}) {
           setZone('content');
           setContentIndex(0);
         }
-      } else if (key === 'Enter') {
+      } else if (key === 'Enter' || key === ' ' || key === 'DPadCenter' || key === 'Select') {
         e.preventDefault();
-        onSelectChannel(sidebarIndex);
+        if (sidebarIndex === -1) {
+          document.getElementById('stream-item-home')?.click();
+        } else {
+          onSelectChannel(sidebarIndex);
+        }
       }
     } else if (zone === 'content') {
       if (key === 'ArrowLeft') {
@@ -105,7 +108,7 @@ export function useTVNavigation(config = {}) {
       } else if (key === 'ArrowDown') {
         e.preventDefault();
         setContentIndex(prev => Math.min(prev + 1, Math.max(contentCount - 1, 0)));
-      } else if (key === 'Enter') {
+      } else if (key === 'Enter' || key === ' ' || key === 'DPadCenter' || key === 'Select') {
         e.preventDefault();
         // Trigger action for active content item
         const focusedElement = document.querySelector('.rail-card.focused, .footer-action.focused, .tv-card.focused, .settings-trigger.focused, .tv-table-row.focused');
@@ -121,16 +124,6 @@ export function useTVNavigation(config = {}) {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleKeyDown]);
-
-  // Sync HTML inputs and button focuses for settings modal
-  useEffect(() => {
-    if (zone === 'settings') {
-      const inputs = document.querySelectorAll('.settings-input, .settings-btn');
-      if (inputs[settingsIndex]) {
-        inputs[settingsIndex].focus();
-      }
-    }
-  }, [zone, settingsIndex]);
 
   return {
     zone,
