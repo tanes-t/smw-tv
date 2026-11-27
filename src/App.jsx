@@ -30,7 +30,14 @@ import { loadRemoteChannelConfig, saveRemoteChannelConfig } from './services/cha
 const CONTENT_ITEMS = 6;
 
 export default function App() {
-  const [showIntro, setShowIntro] = useState(true);
+  const [showIntro, setShowIntro] = useState(() => {
+    // Only show intro once per browser/app session to prevent lag on channel changes/reloads
+    try {
+      return !sessionStorage.getItem('smw_intro_played');
+    } catch {
+      return false;
+    }
+  });
   const [viewMode, setViewMode] = useState('gallery'); // 'gallery' | 'live'
   const [isControlsVisible, setIsControlsVisible] = useState(true);
   const controlsTimeoutRef = useRef(null);
@@ -501,7 +508,10 @@ export default function App() {
   return (
     <>
       {showIntro && (
-        <IntroMotion onComplete={() => setShowIntro(false)} />
+        <IntroMotion onComplete={() => {
+          setShowIntro(false);
+          try { sessionStorage.setItem('smw_intro_played', 'true'); } catch {}
+        }} />
       )}
 
       {viewMode === 'gallery' ? (

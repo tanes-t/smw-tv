@@ -108,28 +108,28 @@ export default function IntroMotion({ onComplete }) {
     // Prevent instant dismissal from the same click event
     const graceTimer = setTimeout(() => {
       canSkipRef.current = true;
-    }, 450);
+    }, 200);
 
-    // Stage 1: Ignite to Form (at 400ms)
+    // Stage 1: Ignite to Form (at 200ms)
     const t1 = setTimeout(() => {
       setStage('form');
-    }, 400);
+    }, 200);
 
-    // Stage 2: Form to Reveal (at 1200ms)
+    // Stage 2: Form to Reveal (at 700ms)
     const t2 = setTimeout(() => {
       setStage('reveal');
-    }, 1200);
+    }, 700);
 
-    // Stage 3: Zoom Through (at 2300ms)
+    // Stage 3: Zoom Through (at 1400ms)
     const t3 = setTimeout(() => {
       setStage('zoom');
-    }, 2300);
+    }, 1400);
 
-    // Stage 4: Completed (at 2900ms)
+    // Stage 4: Completed (at 1800ms)
     const t4 = setTimeout(() => {
       setStage('done');
       onComplete?.();
-    }, 2900);
+    }, 1800);
 
     // Keyboard / remote listener to skip
     const handleKeyDown = (e) => {
