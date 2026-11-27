@@ -127,11 +127,15 @@ export default function App() {
     };
   }, [viewMode, resetControlsTimeout]);
 
+  // ── Load centralized config from Vercel (Redis) on mount ──
   useEffect(() => {
     let cancelled = false;
     loadRemoteChannelConfig()
-      .then((configs) => {
-        if (cancelled || !configs || !configs.length) return;
+      .then((result) => {
+        if (cancelled) return;
+        const configs = result?.channels;
+        if (!configs || !configs.length) return;
+
         setChannels((prev) => {
           const merged = configs.map(rc => {
             const no = rc.no || rc.channel_no;
@@ -163,12 +167,25 @@ export default function App() {
           saveCustomChannels(merged);
           return merged;
         });
+
+        // Apply centralized refreshInterval from Vercel
+        if (result.settings?.refreshInterval) {
+          const remoteInterval = parseInt(result.settings.refreshInterval);
+          if (remoteInterval >= 1 && remoteInterval <= 60) {
+            setRefreshInterval(remoteInterval);
+            localStorage.setItem('smw_tv_refresh_interval', String(remoteInterval));
+          }
+        }
+
+        if (result._fromCache) {
+          showToast('โหมดออฟไลน์: ใช้ข้อมูลจาก cache');
+        }
       })
       .catch(() => {
         // Local storage remains the offline fallback when the database is not connected.
       });
     return () => { cancelled = true; };
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const showToast = useCallback((msg) => {
     setToastMessage(msg);
@@ -441,7 +458,7 @@ export default function App() {
     setIsSettingsOpen(false);
     showToast('บันทึกการตั้งค่าช่องทั้งหมดเรียบร้อยแล้ว');
 
-    saveRemoteChannelConfig(updatedChannels).catch(() => {
+    saveRemoteChannelConfig(updatedChannels, { refreshInterval: newInterval }).catch(() => {
       // Local storage fallback remains reliable
     });
 

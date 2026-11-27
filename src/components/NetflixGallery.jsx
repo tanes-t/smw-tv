@@ -31,12 +31,12 @@ export default function NetflixGallery({
 
     // Filter by search query if any
     const filtered = searchQuery.trim()
-      ? playable.filter(c => 
-          c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          (c.description && c.description.toLowerCase().includes(searchQuery.toLowerCase())) ||
-          (c.category && c.category.toLowerCase().includes(searchQuery.toLowerCase())) ||
-          c.no.includes(searchQuery)
-        )
+      ? playable.filter(c =>
+        c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (c.description && c.description.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (c.category && c.category.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        c.no.includes(searchQuery)
+      )
       : playable;
 
     if (activeCategoryFilter !== 'ALL') {
@@ -548,4 +548,4 @@ export default function NetflixGallery({
       )}
     </div>
   );
-}
+}

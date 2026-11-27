@@ -953,6 +953,17 @@ button {
   gap: 0.6rem;
   padding-bottom: 0.65rem;
 }
+.hub-sync-badge {
+  margin-left: auto;
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: #4ade80;
+  background: rgba(74, 222, 128, 0.1);
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+}
 
 .settings-field {
   display: flex;
@@ -3587,6 +3598,197 @@ button {
     padding: 0.85rem 1.15rem 0.75rem 1.15rem;
   }
 }
+
+/* ── Android TV (960x540 CSS dp @2x) & Compact Viewport Adaptation ── */
+@media (max-width: 1280px), (max-height: 680px) {
+  .netflix-nav {
+    height: 58px;
+    padding: 0 1.5rem;
+  }
+
+  .netflix-nav-left {
+    gap: 1rem;
+  }
+
+  .brand-logo-img {
+    height: 32px;
+  }
+
+  .netflix-nav-links {
+    gap: 0.5rem;
+  }
+
+  .nav-link-btn {
+    font-size: 0.76rem;
+    padding: 0.3rem 0.7rem;
+  }
+
+  .netflix-nav-right {
+    gap: 0.65rem;
+  }
+
+  .netflix-search-input {
+    font-size: 0.78rem;
+    width: 130px;
+  }
+
+  .netflix-billboard {
+    height: auto;
+    margin-top: 58px;
+    min-height: 320px;
+    padding: 1.5rem 2rem 2.75rem 2rem;
+  }
+
+  .billboard-title {
+    font-size: clamp(1.85rem, 3.8vw, 2.75rem);
+  }
+
+  .billboard-meta-content {
+    gap: 0.65rem;
+    max-width: 580px;
+  }
+
+  .billboard-synopsis {
+    font-size: 0.95rem;
+  }
+
+  .billboard-btn {
+    font-size: 0.9rem;
+    padding: 0.68rem 1.35rem;
+  }
+
+  .netflix-rows-section {
+    gap: 2rem;
+    margin-top: -1.75rem;
+    padding: 0 2rem 3.5rem 2rem;
+  }
+
+  .row-title {
+    font-size: 1.18rem;
+  }
+
+  .netflix-card {
+    flex: 0 0 230px;
+    height: 220px;
+    width: 230px;
+  }
+
+  .card-image {
+    height: 118px;
+  }
+}
+
+@media (max-width: 1050px), (max-height: 580px) {
+  .netflix-nav {
+    height: 52px;
+    padding: 0 1rem;
+  }
+
+  .netflix-nav-left {
+    gap: 0.65rem;
+  }
+
+  .brand-logo-img {
+    height: 28px;
+  }
+
+  .netflix-nav-links {
+    gap: 0.35rem;
+  }
+
+  .nav-link-btn {
+    font-size: 0.68rem;
+    padding: 0.24rem 0.55rem;
+  }
+
+  .netflix-nav-right {
+    gap: 0.45rem;
+  }
+
+  .netflix-search-box {
+    padding: 0.22rem 0.45rem;
+  }
+
+  .netflix-search-input {
+    font-size: 0.72rem;
+    width: 95px;
+  }
+
+  .broadcast-indicator {
+    padding: 0.18rem 0.45rem;
+    white-space: nowrap;
+  }
+
+  .live-text {
+    font-size: 0.65rem;
+  }
+
+  .gallery-clock {
+    font-size: 0.88rem;
+    white-space: nowrap;
+  }
+
+  .gallery-settings-btn {
+    height: 30px;
+    width: 30px;
+  }
+
+  .netflix-billboard {
+    margin-top: 52px;
+    min-height: 285px;
+    padding: 1rem 1.5rem 2rem 1.5rem;
+  }
+
+  .billboard-title {
+    font-size: 1.85rem;
+  }
+
+  .billboard-synopsis {
+    font-size: 0.88rem;
+  }
+
+  .billboard-btn {
+    font-size: 0.84rem;
+    padding: 0.58rem 1.1rem;
+  }
+
+  .netflix-rows-section {
+    gap: 1.5rem;
+    margin-top: -1.25rem;
+    padding: 0 1.5rem 3rem 1.5rem;
+  }
+
+  .row-title {
+    font-size: 1.08rem;
+  }
+
+  .row-subtitle {
+    font-size: 0.78rem;
+  }
+
+  .netflix-card {
+    flex: 0 0 205px;
+    height: 195px;
+    width: 205px;
+  }
+
+  .card-image {
+    height: 100px;
+  }
+
+  .card-title {
+    font-size: 0.88rem;
+  }
+
+  .virtual-remote {
+    bottom: 0.75rem;
+    padding: 0.45rem;
+    right: 0.75rem;
+    transform: scale(0.85);
+    transform-origin: bottom right;
+  }
+}
+
 
 /* ── Android TV (960x540 CSS dp @2x) & Compact Viewport Adaptation ── */
 @media (max-width: 1280px), (max-height: 680px) {

@@ -445,6 +445,7 @@ function SettingsForm({
       channels: finalChannels,
       refreshInterval: parseInt(refreshInterval) || 3
     });
+    showToast('💾 บันทึกเรียบร้อย — กำลัง Sync ไปยัง Vercel Cloud...');
     onClose();
   }, [channelList, applyToAllApi, activeEditingChannel, refreshInterval, onSaveChannels, onClose, showToast]);
 
@@ -496,6 +497,7 @@ function SettingsForm({
           <div className="settings-title">
             <SettingsIcon size={20} />
             <span>SMW STREAM • CHANNEL & SYSTEM HUB</span>
+            <span className="hub-sync-badge">☁️ Synced to Vercel</span>
           </div>
           <button className="settings-close-btn" onClick={onClose} aria-label="ปิดหน้าต่าง" autoFocus>
             <CloseIcon size={18} />
