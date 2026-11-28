@@ -2863,9 +2863,9 @@ button {
   font-size: clamp(1.4rem, 3.5vw, 2.4rem);
   font-weight: 950;
   letter-spacing: 0.05em;
-  padding: 0.25rem 0.75rem;
+  padding: 0.22rem 0.7rem;
   box-shadow: 0 0 20px rgba(229, 9, 20, 0.6);
-  animation: introBadgePop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.25s backwards;
+  animation: introBadgeSlide 0.55s cubic-bezier(0.16, 1, 0.3, 1) 0.22s both;
   will-change: transform, opacity;
   white-space: nowrap;
 }
@@ -2940,14 +2940,14 @@ button {
   }
 }
 
-@keyframes introBadgePop {
+@keyframes introBadgeSlide {
   0% {
     opacity: 0;
-    transform: scale(0.4);
+    transform: translateY(-55%) translateX(14px);
   }
   100% {
     opacity: 1;
-    transform: scale(1);
+    transform: translateY(-55%) translateX(0);
   }
 }
 
