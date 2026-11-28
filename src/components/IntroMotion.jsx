@@ -41,20 +41,20 @@ export default function IntroMotion({ onComplete }) {
             osc2.type = 'sine';
             osc2.frequency.setValueAtTime(130.81, now);
             gain2.gain.setValueAtTime(0.35, now);
-            gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.9);
+            gain2.gain.exponentialRampToValueAtTime(0.001, now + 2.5);
             osc2.connect(gain2);
             gain2.connect(ctx.destination);
             osc2.start(now);
-            osc2.stop(now + 0.9);
-          }, 180);
+            osc2.stop(now + 2.5);
+          }, 200);
         }
       }
     } catch {
       // Audio autoplay policy fallback
     }
 
-    // Auto-complete intro when animation finishes (1.75s)
-    const timer = setTimeout(handleFinish, 1750);
+    // Auto-complete intro when animation finishes (5 seconds)
+    const timer = setTimeout(handleFinish, 5000);
 
     const handleKeyOrClick = () => {
       handleFinish();

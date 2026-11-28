@@ -2786,7 +2786,7 @@ button {
   user-select: none;
   width: 100vw;
   z-index: 99999;
-  animation: introFadeOut 0.45s ease 1.3s forwards;
+  animation: introFadeOut 0.6s ease 4.4s forwards;
   will-change: opacity, transform;
   transform: translateZ(0);
 }
@@ -2796,7 +2796,7 @@ button {
   inset: -15%;
   pointer-events: none;
   position: absolute;
-  animation: introRadialPulse 1.4s ease forwards;
+  animation: introRadialPulse 4.5s ease forwards;
   will-change: opacity;
 }
 
@@ -2806,7 +2806,7 @@ button {
   flex-direction: column;
   position: relative;
   z-index: 10;
-  animation: introBrandZoom 1.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: introBrandZoom 4.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   will-change: transform, opacity;
   transform: translateZ(0);
 }
@@ -2954,14 +2954,16 @@ button {
 
 @keyframes introRadialPulse {
   0% { opacity: 0; }
-  35% { opacity: 1; }
-  100% { opacity: 0.7; }
+  15% { opacity: 1; }
+  85% { opacity: 0.9; }
+  100% { opacity: 0; }
 }
 
 @keyframes introBrandZoom {
-  0% { transform: scale(0.94); }
-  65% { transform: scale(1.02); opacity: 1; }
-  100% { transform: scale(1.15); opacity: 0; }
+  0% { transform: scale(0.92); opacity: 0; }
+  12% { transform: scale(1); opacity: 1; }
+  85% { transform: scale(1.05); opacity: 1; }
+  100% { transform: scale(1.1); opacity: 0; }
 }
 
 @keyframes introFadeOut {
