@@ -79,10 +79,12 @@ export default function IntroMotion({ onComplete }) {
       {/* Main Logo Container */}
       <div className="intro-brand-wrapper">
         <div className="intro-letters-container">
-          <span className="intro-char char-s">S</span>
-          <span className="intro-char char-m">M</span>
-          <span className="intro-char char-w">W</span>
-          <span className="intro-tv-badge">TV</span>
+          <div className="intro-letters-group">
+            <span className="intro-char char-s">S</span>
+            <span className="intro-char char-m">M</span>
+            <span className="intro-char char-w">W</span>
+            <span className="intro-tv-badge">TV</span>
+          </div>
         </div>
 
         {/* Cinematic Flare Bar */}

@@ -2774,26 +2774,26 @@ button {
    ========================================================== */
 
 .pure-keyframe-intro {
-  align-items: center;
   background: #000000;
   cursor: pointer;
-  display: flex;
-  height: 100vh;
   inset: 0;
-  justify-content: center;
   overflow: hidden;
   position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
   user-select: none;
-  width: 100vw;
   z-index: 99999;
   animation: introFadeOut 0.6s ease 4.4s forwards;
-  will-change: opacity, transform;
-  transform: translateZ(0);
+  will-change: opacity;
 }
 
 .pure-keyframe-intro .intro-radial-bg {
-  background: radial-gradient(circle at 50% 50%, rgba(229, 9, 20, 0.3) 0%, rgba(229, 9, 20, 0.05) 50%, transparent 75%);
-  inset: -15%;
+  background: radial-gradient(circle at 50% 50%, rgba(229, 9, 20, 0.35) 0%, rgba(229, 9, 20, 0.06) 45%, transparent 70%);
+  inset: -20%;
   pointer-events: none;
   position: absolute;
   animation: introRadialPulse 4.5s ease forwards;
@@ -2804,18 +2804,32 @@ button {
   align-items: center;
   display: flex;
   flex-direction: column;
-  position: relative;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   z-index: 10;
   animation: introBrandZoom 4.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   will-change: transform, opacity;
-  transform: translateZ(0);
+  text-align: center;
+  width: max-content;
+  max-width: 90vw;
 }
 
 .pure-keyframe-intro .intro-letters-container {
-  align-items: center;
   display: flex;
-  gap: 0.15rem;
+  justify-content: center;
+  align-items: center;
   position: relative;
+  width: 100%;
+}
+
+.pure-keyframe-intro .intro-letters-group {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  gap: 0.15rem;
 }
 
 .pure-keyframe-intro .intro-char {
@@ -2838,6 +2852,10 @@ button {
 .pure-keyframe-intro .char-w { animation-delay: 0.19s; }
 
 .pure-keyframe-intro .intro-tv-badge {
+  position: absolute;
+  left: calc(100% + 0.45rem);
+  top: 50%;
+  transform: translateY(-55%);
   background: #E50914;
   border-radius: 6px;
   color: #ffffff;
@@ -2845,19 +2863,20 @@ button {
   font-size: clamp(1.4rem, 3.5vw, 2.4rem);
   font-weight: 950;
   letter-spacing: 0.05em;
-  margin-left: 0.6rem;
-  margin-top: -1.2rem;
   padding: 0.25rem 0.75rem;
   box-shadow: 0 0 20px rgba(229, 9, 20, 0.6);
   animation: introBadgePop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.25s backwards;
   will-change: transform, opacity;
+  white-space: nowrap;
 }
 
 .pure-keyframe-intro .intro-flare-bar {
   background: linear-gradient(90deg, transparent 0%, #E50914 25%, #ffffff 50%, #E50914 75%, transparent 100%);
   height: 2px;
   margin-top: 1.2rem;
-  width: 90%;
+  width: 100%;
+  min-width: 380px;
+  max-width: 650px;
   animation: introFlareSweep 0.8s ease 0.3s backwards;
   will-change: transform, opacity;
 }
@@ -2870,6 +2889,7 @@ button {
   margin-top: 1rem;
   animation: introSubFade 0.6s ease 0.4s backwards;
   will-change: opacity, transform;
+  text-align: center;
 }
 
 .pure-keyframe-intro .intro-tagline {
@@ -2879,7 +2899,9 @@ button {
   font-weight: 800;
   letter-spacing: 0.32em;
   margin: 0;
+  margin-right: -0.32em;
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+  white-space: nowrap;
 }
 
 .pure-keyframe-intro .intro-corp {
@@ -2889,7 +2911,9 @@ button {
   font-weight: 700;
   letter-spacing: 0.22em;
   margin: 0;
+  margin-right: -0.22em;
   opacity: 0.9;
+  white-space: nowrap;
 }
 
 .pure-keyframe-intro .intro-skip-hint {
@@ -2960,10 +2984,10 @@ button {
 }
 
 @keyframes introBrandZoom {
-  0% { transform: scale(0.92); opacity: 0; }
-  12% { transform: scale(1); opacity: 1; }
-  85% { transform: scale(1.05); opacity: 1; }
-  100% { transform: scale(1.1); opacity: 0; }
+  0% { transform: translate(-50%, -50%) scale(0.92); opacity: 0; }
+  12% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+  85% { transform: translate(-50%, -50%) scale(1.05); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(1.1); opacity: 0; }
 }
 
 @keyframes introFadeOut {
@@ -2971,104 +2995,7 @@ button {
   100% { opacity: 0; pointer-events: none; }
 }
 
-/* TV Badge */
-.intro-tv-badge {
-  background: #ffffff;
-  border-radius: 4px;
-  color: #000000;
-  font-family: 'Outfit', sans-serif;
-  font-size: clamp(1.2rem, 3.2vw, 2.2rem);
-  font-weight: 950;
-  letter-spacing: 0.05em;
-  margin-left: 0.6rem;
-  margin-top: -1.5rem;
-  opacity: 0;
-  padding: 0.2rem 0.65rem;
-  transform: scale(0.5);
-  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.35s, opacity 0.4s ease 0.35s;
-}
 
-.intro-motion-overlay.form .intro-tv-badge,
-.intro-motion-overlay.reveal .intro-tv-badge,
-.intro-motion-overlay.zoom .intro-tv-badge {
-  opacity: 1;
-  transform: scale(1);
-}
-
-/* Horizontal Light Flare Sweep */
-.intro-flare-bar {
-  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.8) 50%, transparent 100%);
-  filter: blur(2px);
-  height: 2px;
-  margin-top: 1.2rem;
-  opacity: 0;
-  transform: scaleX(0);
-  transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s, opacity 0.5s ease 0.2s;
-  width: 90%;
-}
-
-.intro-motion-overlay.form .intro-flare-bar,
-.intro-motion-overlay.reveal .intro-flare-bar {
-  opacity: 0.9;
-  transform: scaleX(1);
-}
-
-/* Subtitle & Taglines */
-.intro-sub-content {
-  align-items: center;
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-  margin-top: 1rem;
-  opacity: 0;
-  transform: translateY(12px);
-  transition: transform 0.6s ease 0.4s, opacity 0.6s ease 0.4s;
-}
-
-.intro-motion-overlay.reveal .intro-sub-content,
-.intro-motion-overlay.zoom .intro-sub-content {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.intro-tagline {
-  color: #ffffff;
-  font-family: 'Outfit', sans-serif;
-  font-size: clamp(0.75rem, 1.8vw, 1.15rem);
-  font-weight: 800;
-  letter-spacing: 0.32em;
-  margin: 0;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9);
-}
-
-.intro-corp {
-  color: #ff6b81;
-  font-family: monospace;
-  font-size: clamp(0.65rem, 1.2vw, 0.85rem);
-  font-weight: 700;
-  letter-spacing: 0.24em;
-  margin: 0;
-  opacity: 0.85;
-}
-
-/* Skip Hint */
-.intro-skip-hint {
-  bottom: 2rem;
-  color: rgba(255, 255, 255, 0.4);
-  font-size: 0.82rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  opacity: 0;
-  pointer-events: none;
-  position: absolute;
-  right: 2.5rem;
-  transition: opacity 0.8s ease 0.8s;
-}
-
-.intro-motion-overlay.form .intro-skip-hint,
-.intro-motion-overlay.reveal .intro-skip-hint {
-  opacity: 1;
-}
 
 /* ==========================================================
    CHANNEL & SYSTEM CONTROL HUB (Master-Detail Impeccable Layout)
